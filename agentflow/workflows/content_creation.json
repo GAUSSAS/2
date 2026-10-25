@@ -1,0 +1,112 @@
+{
+  "id": "content_creation",
+  "name": "内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布）",
+  "description": "同一引擎上的第二个流程，用于验证可扩展性：规划 Agent 出大纲，写作 Agent 写初稿，审校 Agent 按可计算标准打分并给出结构化修改意见，写作 Agent 依据意见定向修订（回边循环），通过后发布。",
+  "version": "1.0.0",
+  "start": "plan",
+  "inputs": {
+    "topic": {
+      "type": "string",
+      "required": true,
+      "default": "多 Agent 工作流在企业内部的落地",
+      "description": "写作主题"
+    },
+    "audience": {
+      "type": "string",
+      "default": "工程团队",
+      "description": "目标读者"
+    },
+    "tone": {
+      "type": "string",
+      "default": "务实",
+      "description": "语气风格"
+    },
+    "sections": {
+      "type": "integer",
+      "default": 3,
+      "description": "小节数量（最多 4）"
+    },
+    "max_revisions": {
+      "type": "integer",
+      "default": 3,
+      "description": "最多修订次数，超过则带问题发布"
+    }
+  },
+  "defaults": {
+    "max_visits": 8,
+    "timeout_s": 30,
+    "on_error": "fail",
+    "retry": {"max_attempts": 1}
+  },
+  "settings": {
+    "parallelism": 2,
+    "max_steps": 40
+  },
+  "nodes": [
+    {
+      "id": "plan",
+      "agent": "planner",
+      "name": "规划 Agent",
+      "kind": "author",
+      "description": "生成标题、论点与分节大纲（含目标字数与要点）",
+      "inputs": {
+        "topic": "inputs.topic",
+        "audience": "inputs.audience",
+        "tone": "inputs.tone",
+        "sections": "inputs.sections"
+      },
+      "outputs": ["outline", "title", "section_count"],
+      "max_visits": 2
+    },
+    {
+      "id": "draft",
+      "agent": "writer",
+      "name": "写作 Agent",
+      "kind": "author",
+      "description": "按大纲写稿；拿到审校意见后定向修订",
+      "inputs": {
+        "outline": "artifacts.outline",
+        "notes": {"ref": "nodes.edit.notes", "default": []},
+        "revision": {"ref": "nodes.edit.revision", "default": 0}
+      },
+      "outputs": ["draft", "char_count", "draft_round", "revised", "addressed"],
+      "max_visits": 3,
+      "retry": {"max_attempts": 2, "backoff_ms": 50}
+    },
+    {
+      "id": "edit",
+      "agent": "editor",
+      "name": "审校 Agent",
+      "kind": "review",
+      "description": "检查每节字数、要点覆盖、重复句与口水词",
+      "inputs": {
+        "draft": "artifacts.draft",
+        "outline": "artifacts.outline"
+      },
+      "outputs": ["verdict", "notes", "score", "revision", "summary", "metrics"],
+      "max_visits": 6
+    },
+    {
+      "id": "publish",
+      "agent": "publisher",
+      "name": "发布 Agent",
+      "kind": "deliver",
+      "description": "输出终稿与发布说明",
+      "inputs": {
+        "draft": "artifacts.draft",
+        "verdict": "nodes.edit.verdict",
+        "score": "nodes.edit.score",
+        "notes": "nodes.edit.notes"
+      },
+      "outputs": ["document", "verdict", "char_count", "summary"],
+      "max_visits": 1
+    }
+  ],
+  "edges": [
+    {"from": "plan", "to": "draft", "label": "大纲"},
+    {"from": "draft", "to": "edit", "label": "初稿"},
+    {"from": "edit", "to": "draft", "when": "verdict == 'needs_revision' and revision < inputs.max_revisions", "label": "需要修订"},
+    {"from": "edit", "to": "publish", "when": "verdict == 'pass'", "label": "审校通过"},
+    {"from": "edit", "to": "publish", "when": "verdict == 'needs_revision' and revision >= inputs.max_revisions", "label": "达到修订上限"}
+  ]
+}

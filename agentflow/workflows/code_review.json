@@ -1,0 +1,346 @@
+{
+  "id": "code_review",
+  "name": "代码审查流程（编码 → 并行审查 → 汇总 → 修复 → 复审）",
+  "description": "3+ Agent 协作的最小软件工程闭环：编码 Agent 产出首版实现，风格与安全两个审查 Agent 并行审查，汇总 Agent 合并结论并做质量门禁；不通过则修复 Agent 定点修复后回边复审，直到通过或轮次超限升级人工。",
+  "version": "1.1.0",
+  "start": "coder",
+  "inputs": {
+    "task": {
+      "type": "string",
+      "description": "需求描述；可省略（模板模式用内置默认需求，审查外部文件时自动生成）"
+    },
+    "filename": {
+      "type": "string",
+      "default": "",
+      "description": "目标文件名；留空时按 path 推导（模板模式则用 profile_service.py）"
+    },
+    "path": {
+      "type": "string",
+      "default": "",
+      "description": "待审源码路径（如 examples/legacy_billing.py）；提供后直接审查该文件，跳过模板生成"
+    },
+    "source": {
+      "type": "string",
+      "default": "",
+      "description": "内联待审源码（与 path 二选一，适合短片段）"
+    },
+    "max_rounds": {
+      "type": "integer",
+      "default": 3,
+      "description": "最多评审轮次，超过则升级人工"
+    },
+    "mode": {
+      "type": "string",
+      "default": "template",
+      "description": "源码来源：template（离线模板）/ llm（需配置 AGENTFLOW_LLM_*）/ file（配合 path）"
+    }
+  },
+  "defaults": {
+    "max_visits": 12,
+    "timeout_s": 30,
+    "on_error": "fail",
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "settings": {
+    "parallelism": 4,
+    "max_steps": 60
+  },
+  "nodes": [
+    {
+      "id": "coder",
+      "agent": "coder",
+      "name": "编码 Agent",
+      "kind": "author",
+      "description": "准备待审源码：模板生成、接入 LLM，或直接导入外部文件",
+      "inputs": {
+        "task": {"ref": "inputs.task", "default": ""},
+        "filename": "inputs.filename",
+        "path": "inputs.path",
+        "source": "inputs.source",
+        "mode": "inputs.mode"
+      },
+      "outputs": [
+        "code",
+        "filename",
+        "language",
+        "lines",
+        "generator"
+      ],
+      "max_visits": 1,
+      "retry": {
+        "max_attempts": 2,
+        "backoff_ms": 50
+      }
+    },
+    {
+      "id": "review_style",
+      "agent": "reviewer",
+      "name": "风格审查",
+      "kind": "review",
+      "description": "检查文档字符串、类型标注、可变默认参数、异常处理等风格问题",
+      "inputs": {
+        "code": "artifacts.code"
+      },
+      "params": {
+        "categories": [
+          "style"
+        ],
+        "artifact": "review_style",
+        "review_name": "风格审查"
+      },
+      "outputs": [
+        "findings",
+        "error_count",
+        "warning_count",
+        "info_count",
+        "verdict",
+        "score",
+        "summary"
+      ],
+      "max_visits": 10
+    },
+    {
+      "id": "review_security",
+      "agent": "reviewer",
+      "name": "安全审查",
+      "kind": "review",
+      "description": "检查 SQL 注入、硬编码凭据、弱哈希等安全问题",
+      "inputs": {
+        "code": "artifacts.code"
+      },
+      "params": {
+        "categories": [
+          "security"
+        ],
+        "artifact": "review_security",
+        "review_name": "安全审查"
+      },
+      "outputs": [
+        "findings",
+        "error_count",
+        "warning_count",
+        "info_count",
+        "verdict",
+        "score",
+        "summary"
+      ],
+      "max_visits": 10
+    },
+    {
+      "id": "aggregate",
+      "agent": "aggregator",
+      "name": "汇总门禁",
+      "kind": "gate",
+      "description": "等待两路审查完成（join），合并去重后给出 verdict",
+      "needs": [
+        "review_style",
+        "review_security"
+      ],
+      "inputs": {
+        "style_review": "artifacts.review_style",
+        "security_review": "artifacts.review_security"
+      },
+      "outputs": [
+        "findings",
+        "error_count",
+        "warning_count",
+        "info_count",
+        "verdict",
+        "score",
+        "by_rule",
+        "summary",
+        "iteration"
+      ],
+      "max_visits": 10
+    },
+    {
+      "id": "fix_errors",
+      "agent": "fixer",
+      "name": "修复（阻塞）",
+      "kind": "fix",
+      "description": "只修复 severity=error 的问题（注入、硬编码凭据、弱哈希）",
+      "inputs": {
+        "code": "artifacts.code",
+        "findings": "nodes.aggregate.findings"
+      },
+      "params": {
+        "severity": [
+          "error"
+        ],
+        "role": "阻塞问题修复"
+      },
+      "outputs": [
+        "code",
+        "applied",
+        "skipped",
+        "fixed_count",
+        "remaining_errors",
+        "remaining_warnings",
+        "compiled"
+      ],
+      "max_visits": 4,
+      "retry": {
+        "max_attempts": 2,
+        "backoff_ms": 50
+      }
+    },
+    {
+      "id": "fix_warnings",
+      "agent": "fixer",
+      "name": "修复（风格）",
+      "kind": "fix",
+      "description": "只修复 severity=warning 的问题（文档、类型标注、裸 except 等）",
+      "inputs": {
+        "code": "artifacts.code",
+        "findings": "nodes.aggregate.findings"
+      },
+      "params": {
+        "severity": [
+          "warning"
+        ],
+        "role": "风格问题修复"
+      },
+      "outputs": [
+        "code",
+        "applied",
+        "skipped",
+        "fixed_count",
+        "remaining_errors",
+        "remaining_warnings",
+        "compiled"
+      ],
+      "max_visits": 4,
+      "retry": {
+        "max_attempts": 2,
+        "backoff_ms": 50
+      }
+    },
+    {
+      "id": "finalize",
+      "agent": "reporter",
+      "name": "交付 Agent",
+      "kind": "deliver",
+      "description": "输出终版代码、审查报告与交付摘要",
+      "inputs": {
+        "code": "artifacts.code",
+        "findings": "nodes.aggregate.findings",
+        "verdict": "vars.verdict",
+        "task": {"ref": "inputs.task", "default": ""},
+        "filename": {"ref": "inputs.filename", "default": ""}
+      },
+      "outputs": [
+        "report_md",
+        "verdict",
+        "score",
+        "summary",
+        "final_code"
+      ],
+      "max_visits": 1
+    },
+    {
+      "id": "escalate",
+      "agent": "escalator",
+      "name": "升级人工",
+      "kind": "risk",
+      "description": "自动修复无法收敛或轮次超限时，产出人工处理清单",
+      "inputs": {
+        "findings": "nodes.aggregate.findings",
+        "verdict": "vars.verdict"
+      },
+      "outputs": [
+        "escalated",
+        "reason",
+        "todo",
+        "summary"
+      ],
+      "max_visits": 1
+    }
+  ],
+  "edges": [
+    {
+      "from": "coder",
+      "to": "review_style",
+      "label": "提交代码"
+    },
+    {
+      "from": "coder",
+      "to": "review_security",
+      "label": "提交代码"
+    },
+    {
+      "from": "review_style",
+      "to": "aggregate",
+      "label": "风格审查结果"
+    },
+    {
+      "from": "review_security",
+      "to": "aggregate",
+      "label": "安全审查结果"
+    },
+    {
+      "from": "aggregate",
+      "to": "escalate",
+      "when": "verdict != 'pass' and iteration >= inputs.max_rounds",
+      "label": "轮次超限",
+      "exclusive": true
+    },
+    {
+      "from": "aggregate",
+      "to": "fix_errors",
+      "when": "verdict == 'fail'",
+      "label": "存在阻塞问题"
+    },
+    {
+      "from": "aggregate",
+      "to": "fix_warnings",
+      "when": "verdict == 'pass_with_warnings'",
+      "label": "仅剩风格告警"
+    },
+    {
+      "from": "aggregate",
+      "to": "finalize",
+      "when": "verdict == 'pass'",
+      "label": "通过"
+    },
+    {
+      "from": "fix_errors",
+      "to": "escalate",
+      "when": "fixed_count == 0",
+      "label": "无法自动修复",
+      "exclusive": true
+    },
+    {
+      "from": "fix_errors",
+      "to": "review_style",
+      "when": "fixed_count > 0",
+      "label": "修复后复审"
+    },
+    {
+      "from": "fix_errors",
+      "to": "review_security",
+      "when": "fixed_count > 0",
+      "label": "修复后复审"
+    },
+    {
+      "from": "fix_warnings",
+      "to": "finalize",
+      "when": "fixed_count == 0",
+      "label": "无自动修复项，带告警交付",
+      "exclusive": true
+    },
+    {
+      "from": "fix_warnings",
+      "to": "review_style",
+      "when": "fixed_count > 0",
+      "label": "修订后复审"
+    },
+    {
+      "from": "fix_warnings",
+      "to": "review_security",
+      "when": "fixed_count > 0",
+      "label": "修订后复审"
+    }
+  ]
+}

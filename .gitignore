@@ -1,0 +1,13 @@
+# 运行产物与缓存
+runs/
+*.pyc
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+.DS_Store

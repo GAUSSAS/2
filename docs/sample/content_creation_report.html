@@ -1,0 +1,1769 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AgentFlow · 内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布） · content_creation-20261025-122419-fnu3</title><style>
+:root {
+  --bg: #0b1120; --panel: #111a2e; --panel-2: #0f172a; --border: #1f2b45;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; font-size: 14px; line-height: 1.6; }
+a { color: var(--accent); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 64px; }
+header.top { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 22px; }
+h1 { font-size: 21px; margin: 0 0 6px; }
+h2 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+h3 { font-size: 14px; margin: 16px 0 8px; color: var(--muted); font-weight: 600; }
+.sub { color: var(--muted); font-size: 12.5px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
+  font-weight: 600; font-size: 13px; border: 1px solid transparent; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.card + .card { margin-top: 18px; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 12px; }
+.metric { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.metric .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.metric .k { color: var(--muted); font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+code, pre, .mono { font-family: var(--mono); }
+code { background: rgba(56,189,248,.09); color: #7dd3fc; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+pre { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+  overflow-x: auto; font-size: 12.5px; line-height: 1.55; margin: 0; }
+pre.diff .add { color: #4ade80; } pre.diff .del { color: #f87171; } pre.diff .hunk { color: #7dd3fc; }
+details { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; background: var(--panel-2); }
+details + details { margin-top: 10px; }
+summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+svg { width: 100%; max-width: 720px; height: auto; display: block; margin: 0 auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.timeline { max-height: 460px; overflow-y: auto; font-family: var(--mono); font-size: 12.3px; }
+.tl-row { display: flex; gap: 10px; padding: 3px 0; border-bottom: 1px dashed rgba(148,163,184,.12); }
+.tl-t { color: var(--muted); min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
+.tl-k { min-width: 86px; font-weight: 600; }
+.tl-m { color: var(--muted); overflow-wrap: anywhere; }
+.sev-error { color: #f87171; font-weight: 600; }
+.sev-warning { color: #fbbf24; font-weight: 600; }
+.sev-info { color: #94a3b8; }
+.tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.tab { padding: 4px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2);
+  color: var(--muted); font-size: 12px; cursor: pointer; }
+.tab.on { border-color: var(--accent); color: var(--accent); }
+.panel { display: none; } .panel.on { display: block; }
+.note { border-left: 3px solid var(--accent); padding: 8px 12px; background: rgba(56,189,248,.07);
+  border-radius: 0 8px 8px 0; color: var(--muted); font-size: 13px; }
+footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: center; }
+</style></head><body><div class="wrap">
+<header class="top">
+  <div>
+    <h1>内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布）</h1>
+    <div class="sub">工作流 <code>content_creation</code> v1.0.0 ·
+      运行 <code>content_creation-20261025-122419-fnu3</code> · 2026-10-25 12:24:19</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <span class="pill" style="background:#22c55e22;border-color:#22c55e66;color:#22c55e"><span class="dot" style="background:#22c55e"></span>通过</span>
+    <span class="sub">用时 0.019s</span>
+  </div>
+</header>
+
+<div class="metrics">
+  <div class="metric"><div class="v">6</div><div class="k">节点执行次数</div></div>
+  <div class="metric"><div class="v">6</div><div class="k">波次数</div></div>
+  <div class="metric"><div class="v">6</div><div class="k">Agent 消息</div></div>
+  <div class="metric"><div class="v">5</div><div class="k">作品数</div></div>
+  <div class="metric"><div class="v">0</div><div class="k">重试次数</div></div>
+  <div class="metric"><div class="v">0</div><div class="k">审校意见</div></div>
+  <div class="metric"><div class="v">100</div><div class="k">质量评分</div></div>
+  <div class="metric"><div class="v">5</div><div class="k">边触发次数</div></div>
+</div>
+
+<div class="grid" style="margin-top:18px">
+  <div class="card">
+    <h2>① 工作流执行图</h2>
+    <svg viewBox="0 0 356 498" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="workflow graph"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker><marker id="arrow-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b"/></marker></defs><path d="M 123.0 104.0 C 123.0 132.0, 123.0 122.0, 123.0 150.0" fill="none" stroke="#475569" stroke-width="1.6"  marker-end="url(#arrow)"><title>plan → draft</title></path><text x="129" y="131" fill="#94a3b8" font-size="10" text-anchor="start" font-family="ui-monospace, monospace">大纲</text><path d="M 123.0 226.0 C 123.0 254.0, 123.0 244.0, 123.0 272.0" fill="none" stroke="#475569" stroke-width="1.6"  marker-end="url(#arrow)"><title>draft → edit</title></path><text x="129" y="253" fill="#94a3b8" font-size="10" text-anchor="start" font-family="ui-monospace, monospace">初稿</text><path d="M 218.0 310.0 C 320.0 310.0, 320.0 188.0, 218.0 188.0" fill="none" stroke="#f59e0b" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrow-back)"><title>edit → draft  [verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions]</title></path><text x="230" y="253" fill="#94a3b8" font-size="10" text-anchor="start" font-family="ui-monospace, monospace">需要修订</text><path d="M 123.0 348.0 C 123.0 376.0, 123.0 366.0, 123.0 394.0" fill="none" stroke="#475569" stroke-width="1.6"  marker-end="url(#arrow)"><title>edit → publish  [verdict == &#x27;pass&#x27;]</title></path><text x="129" y="375" fill="#94a3b8" font-size="10" text-anchor="start" font-family="ui-monospace, monospace">审校通过</text><path d="M 123.0 348.0 C 123.0 376.0, 123.0 366.0, 123.0 394.0" fill="none" stroke="#475569" stroke-width="1.6"  marker-end="url(#arrow)"><title>edit → publish  [verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions]</title></path><text x="129" y="375" fill="#94a3b8" font-size="10" text-anchor="start" font-family="ui-monospace, monospace">达到修订上限</text><g><title>规划 Agent · planner · 通过 · 0.24ms</title><rect x="28.0" y="28.0" width="190" height="76" rx="10" fill="#111a2e" stroke="#22c55e" stroke-width="2"/><rect x="28.0" y="28.0" width="5" height="76" rx="2.5" fill="#6366f1"/><text x="44" y="53" fill="#e2e8f0" font-size="13" font-weight="600">规划 Agent</text><text x="44" y="72" fill="#94a3b8" font-size="11">planner</text><text x="44" y="91" fill="#22c55e" font-size="10.5" font-family="ui-monospace, monospace">通过</text><circle cx="204" cy="41" r="5" fill="#22c55e"/></g><g><title>写作 Agent · writer · 通过 · 0.3ms</title><rect x="28.0" y="150.0" width="190" height="76" rx="10" fill="#111a2e" stroke="#22c55e" stroke-width="2"/><rect x="28.0" y="150.0" width="5" height="76" rx="2.5" fill="#6366f1"/><text x="44" y="175" fill="#e2e8f0" font-size="13" font-weight="600">写作 Agent</text><text x="44" y="194" fill="#94a3b8" font-size="11">writer</text><text x="44" y="213" fill="#22c55e" font-size="10.5" font-family="ui-monospace, monospace">通过 ×2</text><circle cx="204" cy="163" r="5" fill="#22c55e"/></g><g><title>审校 Agent · editor · 通过 · 0.29ms</title><rect x="28.0" y="272.0" width="190" height="76" rx="10" fill="#111a2e" stroke="#22c55e" stroke-width="2"/><rect x="28.0" y="272.0" width="5" height="76" rx="2.5" fill="#0ea5e9"/><text x="44" y="297" fill="#e2e8f0" font-size="13" font-weight="600">审校 Agent</text><text x="44" y="316" fill="#94a3b8" font-size="11">editor</text><text x="44" y="335" fill="#22c55e" font-size="10.5" font-family="ui-monospace, monospace">通过 ×2</text><circle cx="204" cy="285" r="5" fill="#22c55e"/></g><g><title>发布 Agent · publisher · 通过 · 0.22ms</title><rect x="28.0" y="394.0" width="190" height="76" rx="10" fill="#111a2e" stroke="#22c55e" stroke-width="2"/><rect x="28.0" y="394.0" width="5" height="76" rx="2.5" fill="#22c55e"/><text x="44" y="419" fill="#e2e8f0" font-size="13" font-weight="600">发布 Agent</text><text x="44" y="438" fill="#94a3b8" font-size="11">publisher</text><text x="44" y="457" fill="#22c55e" font-size="10.5" font-family="ui-monospace, monospace">通过</text><circle cx="204" cy="407" r="5" fill="#22c55e"/></g></svg>
+    <div class="legend"><span><span class="dot" style="background:#22c55e"></span>通过</span><span><span class="dot" style="background:#ef4444"></span>失败</span><span><span class="dot" style="background:#f59e0b"></span>跳过</span><span><span class="dot" style="background:#3b82f6"></span>运行中</span><span><span class="dot" style="background:#64748b"></span>未执行</span></div><div class="legend"><span><span class="dot" style="background:#6366f1"></span>编码/写作</span><span><span class="dot" style="background:#0ea5e9"></span>审查</span><span><span class="dot" style="background:#a855f7"></span>门禁</span><span><span class="dot" style="background:#f97316"></span>修复</span><span><span class="dot" style="background:#22c55e"></span>交付</span><span><span class="dot" style="background:#ef4444"></span>升级</span></div>
+    <div class="note" style="margin-top:12px">
+      同层节点表示同一波次并行执行（如两路审查）；虚线为回边（循环）；箭头上的标签是边条件。
+    </div>
+  </div>
+  <div class="card">
+    <h2>② 运行概览</h2>
+    <table>
+      <tr><th>结论</th><td>通过</td></tr>
+      <tr><th>入参</th><td class="mono">{&quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;, &quot;audience&quot;: &quot;工程团队&quot;, &quot;tone&quot;: &quot;务实&quot;, &quot;sections&quot;: 3, &quot;max_revisions&quot;: 3}</td></tr>
+      <tr><th>循环轮次</th><td>稿件版本 2</td></tr>
+      <tr><th>终态变量</th><td class="mono">{&quot;editor_verdict&quot;: &quot;pass&quot;, &quot;revision&quot;: 2}</td></tr>
+      <tr><th>错误</th><td>无</td></tr>
+    </table>
+    <h3>作品版本</h3>
+    <table>
+      <thead><tr><th>作品</th><th>版本</th><th>作者</th></tr></thead>
+      <tbody>
+        <tr><td><code>outline</code></td><td>v1</td><td>planner</td></tr><tr><td><code>draft</code></td><td>v2</td><td>writer</td></tr><tr><td><code>editorial_review</code></td><td>v2</td><td>editor</td></tr><tr><td><code>final_document</code></td><td>v1</td><td>publisher</td></tr><tr><td><code>publish_note</code></td><td>v1</td><td>publisher</td></tr>
+      </tbody>
+    </table>
+    <h3>执行日志</h3>
+    <div class="timeline"><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#22c55e">run_start</span><span class="tl-m">content_creation</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#38bdf8">wave_start</span><span class="tl-m">波次 1: plan</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#93c5fd">node_start</span><span class="tl-m">plan (planner) 第 1 次执行</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#c084fc">message</span><span class="tl-m">[handoff] plan → writer: 大纲完成：3 个小节</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#7dd3fc">node_end</span><span class="tl-m">plan → ok 0.24ms · outline={&#x27;title&#x27;: &#x27;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&#x27;, &#x27;topic&#x27;: &#x27;多 Agent 工作流在企业内部的落地&#x27;, &#x27;audience&#x27;: &#x27;工程团队&#x27;, &#x27;tone&#x27;: &#x27;务实&#x27;, &#x27;thesis&#x27;: &#x27;围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。&#x27;, &#x27;sections&#x27;: [{&#x27;heading&#x27;: &#x27;背景与问题&#x27;, &#x27;key_points&#x27;: [&#x27;为什么现在要做这件事&#x27;, &#x27;当前痛点与影响范围&#x27;], &#x27;char_target&#x27;: 150}, {&#x27;heading&#x27;: &#x27;方案与做法&#x27;, &#x27;key_points&#x27;: [&#x27;核心设计取舍&#x27;, &#x27;关键实现步骤&#x27;], &#x27;char_target&#x27;: 150}, {&#x27;heading&#x27;: &#x27;落地与验证&#x27;, &#x27;key_points&#x27;: [&#x27;如何度量效果&#x27;, &#x27;风险与回滚方案&#x27;], &#x27;char_target&#x27;: 150}]} title=多 Agent 工作流在企业内部的落地：面向工程团队的实践说明 section_count=3</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✓ plan → draft (大纲)</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#475569">checkpoint</span><span class="tl-m"></span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#38bdf8">wave_start</span><span class="tl-m">波次 2: draft</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#93c5fd">node_start</span><span class="tl-m">draft (writer) 第 1 次执行</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#c084fc">message</span><span class="tl-m">[handoff] draft → editor: 第 1 稿完成（181 字）</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#7dd3fc">node_end</span><span class="tl-m">draft → ok 0.46ms · draft=# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明  &gt; 读者：… char_count=181 draft_round=1 revised=False</span></div><div class="tl-row"><span class="tl-t">+0.00s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✓ draft → edit (初稿)</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#475569">checkpoint</span><span class="tl-m"></span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#38bdf8">wave_start</span><span class="tl-m">波次 3: edit</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#93c5fd">node_start</span><span class="tl-m">edit (editor) 第 1 次执行</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#c084fc">message</span><span class="tl-m">[feedback] edit → writer: 审校结论 needs_revision（6 条阻塞意见）</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#7dd3fc">node_end</span><span class="tl-m">edit → ok 0.47ms · verdict=needs_revision notes=6项 score=11 revision=1</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✓ edit → draft (需要修订) [verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions =&gt; True]</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✗ edit → publish (审校通过) [verdict == &#x27;pass&#x27; =&gt; False]</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✗ edit → publish (达到修订上限) [verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions =&gt; False]</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#475569">checkpoint</span><span class="tl-m"></span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#38bdf8">wave_start</span><span class="tl-m">波次 4: draft</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#93c5fd">node_start</span><span class="tl-m">draft (writer) 第 2 次执行</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#c084fc">message</span><span class="tl-m">[handoff] draft → editor: 第 2 稿完成（668 字）</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#7dd3fc">node_end</span><span class="tl-m">draft → ok 0.3ms · draft=# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明  &gt; 读者：… char_count=668 draft_round=2 revised=True</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✓ draft → edit (初稿)</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#475569">checkpoint</span><span class="tl-m"></span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#38bdf8">wave_start</span><span class="tl-m">波次 5: edit</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#93c5fd">node_start</span><span class="tl-m">edit (editor) 第 2 次执行</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#c084fc">message</span><span class="tl-m">[feedback] edit → writer: 审校结论 pass（0 条阻塞意见）</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#7dd3fc">node_end</span><span class="tl-m">edit → ok 0.29ms · verdict=pass notes=0项 score=100 revision=2</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✗ edit → draft (需要修订) [verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions =&gt; False]</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✓ edit → publish (审校通过) [verdict == &#x27;pass&#x27; =&gt; True]</span></div><div class="tl-row"><span class="tl-t">+0.01s</span><span class="tl-k" style="color:#94a3b8">edge</span><span class="tl-m">✗ edit → publish (达到修订上限) [verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions =&gt; False]</span></div><div class="tl-row"><span class="tl-t">+0.02s</span><span class="tl-k" style="color:#475569">checkpoint</span><span class="tl-m"></span></div><div class="tl-row"><span class="tl-t">+0.02s</span><span class="tl-k" style="color:#38bdf8">wave_start</span><span class="tl-m">波次 6: publish</span></div><div class="tl-row"><span class="tl-t">+0.02s</span><span class="tl-k" style="color:#93c5fd">node_start</span><span class="tl-m">publish (publisher) 第 1 次执行</span></div><div class="tl-row"><span class="tl-t">+0.02s</span><span class="tl-k" style="color:#c084fc">message</span><span class="tl-m">[result] publish → user: 终稿 668 字，可直接发布</span></div><div class="tl-row"><span class="tl-t">+0.02s</span><span class="tl-k" style="color:#7dd3fc">node_end</span><span class="tl-m">publish → ok 0.22ms · document=# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明  &gt; 读者：… verdict=pass char_count=668 summary=终稿 668 字，可直接发布</span></div><div class="tl-row"><span class="tl-t">+0.02s</span><span class="tl-k" style="color:#475569">checkpoint</span><span class="tl-m"></span></div><div class="tl-row"><span class="tl-t">+0.03s</span><span class="tl-k" style="color:#22c55e">run_end</span><span class="tl-m">passed</span></div></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h2>③ Agent 协作</h2>
+  <table><thead><tr><th>#</th><th>方向</th><th>类型</th><th>内容</th></tr></thead><tbody><tr><td class='mono'>m0017</td><td>plan → writer</td><td><code>handoff</code></td><td>大纲完成：3 个小节</td></tr><tr><td class='mono'>m0018</td><td>draft → editor</td><td><code>handoff</code></td><td>第 1 稿完成（181 字）</td></tr><tr><td class='mono'>m0019</td><td>edit → writer</td><td><code>feedback</code></td><td>审校结论 needs_revision（6 条阻塞意见）</td></tr><tr><td class='mono'>m0020</td><td>draft → editor</td><td><code>handoff</code></td><td>第 2 稿完成（668 字）</td></tr><tr><td class='mono'>m0021</td><td>edit → writer</td><td><code>feedback</code></td><td>审校结论 pass（0 条阻塞意见）</td></tr><tr><td class='mono'>m0022</td><td>publish → user</td><td><code>result</code></td><td>终稿 668 字，可直接发布</td></tr></tbody></table>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h2>④ 审校意见与修订</h2>
+  <h3>审校轮次演进</h3><table><thead><tr><th>版本</th><th>结论</th><th>待改</th><th>评分</th><th>字数</th></tr></thead><tbody><tr><td>v1</td><td>needs_revision</td><td>6</td><td>11</td><td>181</td></tr><tr><td>v2</td><td>pass</td><td>0</td><td>100</td><td>668</td></tr></tbody></table><h3>各节字数与要点覆盖</h3><table><thead><tr><th>小节</th><th>字数</th><th>目标</th><th>达标</th><th>缺失要点</th></tr></thead><tbody><tr><td>背景与问题</td><td>194</td><td>150</td><td>✅</td><td class='sub'>无</td></tr><tr><td>方案与做法</td><td>187</td><td>150</td><td>✅</td><td class='sub'>无</td></tr><tr><td>落地与验证</td><td>188</td><td>150</td><td>✅</td><td class='sub'>无</td></tr></tbody></table><div class="note">审校通过，无修改意见。</div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h2>⑤ 作品与代码演进</h2>
+  <div class="tabs"><button class="tab on" data-group="art" data-tab="outline" onclick="showTab(&quot;art&quot;,&quot;outline&quot;)">outline <span class="sub">v1</span></button><button class="tab " data-group="art" data-tab="draft" onclick="showTab(&quot;art&quot;,&quot;draft&quot;)">draft <span class="sub">v2</span></button><button class="tab " data-group="art" data-tab="editorial_review" onclick="showTab(&quot;art&quot;,&quot;editorial_review&quot;)">editorial_review <span class="sub">v2</span></button><button class="tab " data-group="art" data-tab="final_document" onclick="showTab(&quot;art&quot;,&quot;final_document&quot;)">final_document <span class="sub">v1</span></button><button class="tab " data-group="art" data-tab="publish_note" onclick="showTab(&quot;art&quot;,&quot;publish_note&quot;)">publish_note <span class="sub">v1</span></button></div><div class="panel on" data-panel="art" data-panel-id="outline"><pre>{
+  &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;,
+  &quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+  &quot;audience&quot;: &quot;工程团队&quot;,
+  &quot;tone&quot;: &quot;务实&quot;,
+  &quot;thesis&quot;: &quot;围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。&quot;,
+  &quot;sections&quot;: [
+    {
+      &quot;heading&quot;: &quot;背景与问题&quot;,
+      &quot;key_points&quot;: [
+        &quot;为什么现在要做这件事&quot;,
+        &quot;当前痛点与影响范围&quot;
+      ],
+      &quot;char_target&quot;: 150
+    },
+    {
+      &quot;heading&quot;: &quot;方案与做法&quot;,
+      &quot;key_points&quot;: [
+        &quot;核心设计取舍&quot;,
+        &quot;关键实现步骤&quot;
+      ],
+      &quot;char_target&quot;: 150
+    },
+    {
+      &quot;heading&quot;: &quot;落地与验证&quot;,
+      &quot;key_points&quot;: [
+        &quot;如何度量效果&quot;,
+        &quot;风险与回滚方案&quot;
+      ],
+      &quot;char_target&quot;: 150
+    }
+  ]
+}</pre></div><div class="panel " data-panel="art" data-panel-id="draft"><pre># 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明
+
+&gt; 读者：工程团队　语气：务实
+
+围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。
+
+## 背景与问题
+
+为什么现在要做这件事是本节需要说明的关键点。当前痛点与影响范围是本节需要说明的关键点。关于背景与问题，实现上优先使用标准库，避免引入额外依赖。关于背景与问题，调用方需要关注返回值与异常分支，必要时记录日志。关于背景与问题，该能力在测试环境覆盖了典型输入与边界输入。关于背景与问题，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于背景与问题，上线前建议补充监控指标，便于定位问题。
+
+## 方案与做法
+
+核心设计取舍是本节需要说明的关键点。关键实现步骤是本节需要说明的关键点。关于方案与做法，实现上优先使用标准库，避免引入额外依赖。关于方案与做法，调用方需要关注返回值与异常分支，必要时记录日志。关于方案与做法，该能力在测试环境覆盖了典型输入与边界输入。关于方案与做法，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于方案与做法，上线前建议补充监控指标，便于定位问题。
+
+## 落地与验证
+
+如何度量效果是本节需要说明的关键点。风险与回滚方案是本节需要说明的关键点。关于落地与验证，实现上优先使用标准库，避免引入额外依赖。关于落地与验证，调用方需要关注返回值与异常分支，必要时记录日志。关于落地与验证，该能力在测试环境覆盖了典型输入与边界输入。关于落地与验证，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于落地与验证，上线前建议补充监控指标，便于定位问题。
+</pre></div><div class="panel " data-panel="art" data-panel-id="editorial_review"><pre>{
+  &quot;verdict&quot;: &quot;pass&quot;,
+  &quot;revision&quot;: 2,
+  &quot;notes&quot;: [],
+  &quot;blocking&quot;: 0,
+  &quot;metrics&quot;: [
+    {
+      &quot;heading&quot;: &quot;背景与问题&quot;,
+      &quot;chars&quot;: 194,
+      &quot;target&quot;: 150,
+      &quot;missing_points&quot;: []
+    },
+    {
+      &quot;heading&quot;: &quot;方案与做法&quot;,
+      &quot;chars&quot;: 187,
+      &quot;target&quot;: 150,
+      &quot;missing_points&quot;: []
+    },
+    {
+      &quot;heading&quot;: &quot;落地与验证&quot;,
+      &quot;chars&quot;: 188,
+      &quot;target&quot;: 150,
+      &quot;missing_points&quot;: []
+    }
+  ],
+  &quot;fillers&quot;: [],
+  &quot;score&quot;: 100,
+  &quot;char_count&quot;: 668
+}</pre></div><div class="panel " data-panel="art" data-panel-id="final_document"><pre># 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明
+
+&gt; 读者：工程团队　语气：务实
+
+围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。
+
+## 背景与问题
+
+为什么现在要做这件事是本节需要说明的关键点。当前痛点与影响范围是本节需要说明的关键点。关于背景与问题，实现上优先使用标准库，避免引入额外依赖。关于背景与问题，调用方需要关注返回值与异常分支，必要时记录日志。关于背景与问题，该能力在测试环境覆盖了典型输入与边界输入。关于背景与问题，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于背景与问题，上线前建议补充监控指标，便于定位问题。
+
+## 方案与做法
+
+核心设计取舍是本节需要说明的关键点。关键实现步骤是本节需要说明的关键点。关于方案与做法，实现上优先使用标准库，避免引入额外依赖。关于方案与做法，调用方需要关注返回值与异常分支，必要时记录日志。关于方案与做法，该能力在测试环境覆盖了典型输入与边界输入。关于方案与做法，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于方案与做法，上线前建议补充监控指标，便于定位问题。
+
+## 落地与验证
+
+如何度量效果是本节需要说明的关键点。风险与回滚方案是本节需要说明的关键点。关于落地与验证，实现上优先使用标准库，避免引入额外依赖。关于落地与验证，调用方需要关注返回值与异常分支，必要时记录日志。关于落地与验证，该能力在测试环境覆盖了典型输入与边界输入。关于落地与验证，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于落地与验证，上线前建议补充监控指标，便于定位问题。
+
+---
+
+&gt; 审校结论：**pass**（评分 100）；修订过程中处理意见 0 条；全文约 668 字。
+</pre></div><div class="panel " data-panel="art" data-panel-id="publish_note"><pre>{
+  &quot;verdict&quot;: &quot;pass&quot;,
+  &quot;status&quot;: &quot;可直接发布&quot;,
+  &quot;char_count&quot;: 668,
+  &quot;notes&quot;: 0
+}</pre></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h2>⑥ 原始数据</h2>
+  <details><summary>summary.json</summary><pre>{
+  &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+  &quot;workflow&quot;: &quot;content_creation&quot;,
+  &quot;workflow_name&quot;: &quot;内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布）&quot;,
+  &quot;status&quot;: &quot;passed&quot;,
+  &quot;error&quot;: null,
+  &quot;duration_s&quot;: 0.019,
+  &quot;started_at&quot;: 1792902259.3627284,
+  &quot;finished_at&quot;: 1792902259.3881524,
+  &quot;inputs&quot;: {
+    &quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+    &quot;audience&quot;: &quot;工程团队&quot;,
+    &quot;tone&quot;: &quot;务实&quot;,
+    &quot;sections&quot;: 3,
+    &quot;max_revisions&quot;: 3
+  },
+  &quot;variables&quot;: {
+    &quot;editor_verdict&quot;: &quot;pass&quot;,
+    &quot;revision&quot;: 2
+  },
+  &quot;artifacts&quot;: {
+    &quot;outline&quot;: {
+      &quot;version&quot;: 1,
+      &quot;author&quot;: &quot;planner&quot;,
+      &quot;length&quot;: 6
+    },
+    &quot;draft&quot;: {
+      &quot;version&quot;: 2,
+      &quot;author&quot;: &quot;writer&quot;,
+      &quot;length&quot;: 695
+    },
+    &quot;editorial_review&quot;: {
+      &quot;version&quot;: 2,
+      &quot;author&quot;: &quot;editor&quot;,
+      &quot;length&quot;: 8
+    },
+    &quot;final_document&quot;: {
+      &quot;version&quot;: 1,
+      &quot;author&quot;: &quot;publisher&quot;,
+      &quot;length&quot;: 750
+    },
+    &quot;publish_note&quot;: {
+      &quot;version&quot;: 1,
+      &quot;author&quot;: &quot;publisher&quot;,
+      &quot;length&quot;: 4
+    }
+  },
+  &quot;nodes&quot;: [
+    {
+      &quot;node_id&quot;: &quot;plan&quot;,
+      &quot;agent&quot;: &quot;planner&quot;,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;duration_ms&quot;: 0.24,
+      &quot;wave&quot;: 1,
+      &quot;error&quot;: null
+    },
+    {
+      &quot;node_id&quot;: &quot;draft&quot;,
+      &quot;agent&quot;: &quot;writer&quot;,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;duration_ms&quot;: 0.46,
+      &quot;wave&quot;: 2,
+      &quot;error&quot;: null
+    },
+    {
+      &quot;node_id&quot;: &quot;edit&quot;,
+      &quot;agent&quot;: &quot;editor&quot;,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;duration_ms&quot;: 0.47,
+      &quot;wave&quot;: 3,
+      &quot;error&quot;: null
+    },
+    {
+      &quot;node_id&quot;: &quot;draft&quot;,
+      &quot;agent&quot;: &quot;writer&quot;,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;visit&quot;: 2,
+      &quot;attempt&quot;: 1,
+      &quot;duration_ms&quot;: 0.3,
+      &quot;wave&quot;: 4,
+      &quot;error&quot;: null
+    },
+    {
+      &quot;node_id&quot;: &quot;edit&quot;,
+      &quot;agent&quot;: &quot;editor&quot;,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;visit&quot;: 2,
+      &quot;attempt&quot;: 1,
+      &quot;duration_ms&quot;: 0.29,
+      &quot;wave&quot;: 5,
+      &quot;error&quot;: null
+    },
+    {
+      &quot;node_id&quot;: &quot;publish&quot;,
+      &quot;agent&quot;: &quot;publisher&quot;,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;duration_ms&quot;: 0.22,
+      &quot;wave&quot;: 6,
+      &quot;error&quot;: null
+    }
+  ],
+  &quot;stats&quot;: {
+    &quot;waves&quot;: 6,
+    &quot;node_runs&quot;: 6,
+    &quot;retries&quot;: 0,
+    &quot;messages&quot;: 6,
+    &quot;edges_fired&quot;: 5,
+    &quot;errors&quot;: 0
+  },
+  &quot;waves&quot;: 6,
+  &quot;steps&quot;: 6,
+  &quot;outputs_written&quot;: [
+    &quot;artifacts/outline.json&quot;,
+    &quot;artifacts/draft.md&quot;,
+    &quot;artifacts/editorial_review.json&quot;,
+    &quot;artifacts/final_document.md&quot;,
+    &quot;artifacts/publish_note.json&quot;
+  ]
+}</pre></details>
+  <details><summary>workflow 定义</summary><pre>{
+  &quot;id&quot;: &quot;content_creation&quot;,
+  &quot;name&quot;: &quot;内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布）&quot;,
+  &quot;description&quot;: &quot;同一引擎上的第二个流程，用于验证可扩展性：规划 Agent 出大纲，写作 Agent 写初稿，审校 Agent 按可计算标准打分并给出结构化修改意见，写作 Agent 依据意见定向修订（回边循环），通过后发布。&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;start&quot;: &quot;plan&quot;,
+  &quot;inputs&quot;: {
+    &quot;topic&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;required&quot;: true,
+      &quot;default&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+      &quot;description&quot;: &quot;写作主题&quot;
+    },
+    &quot;audience&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;default&quot;: &quot;工程团队&quot;,
+      &quot;description&quot;: &quot;目标读者&quot;
+    },
+    &quot;tone&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;default&quot;: &quot;务实&quot;,
+      &quot;description&quot;: &quot;语气风格&quot;
+    },
+    &quot;sections&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;default&quot;: 3,
+      &quot;description&quot;: &quot;小节数量（最多 4）&quot;
+    },
+    &quot;max_revisions&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;default&quot;: 3,
+      &quot;description&quot;: &quot;最多修订次数，超过则带问题发布&quot;
+    }
+  },
+  &quot;defaults&quot;: {
+    &quot;max_visits&quot;: 8,
+    &quot;timeout_s&quot;: 30,
+    &quot;on_error&quot;: &quot;fail&quot;,
+    &quot;retry&quot;: {
+      &quot;max_attempts&quot;: 1
+    }
+  },
+  &quot;settings&quot;: {
+    &quot;parallelism&quot;: 2,
+    &quot;max_steps&quot;: 40
+  },
+  &quot;nodes&quot;: [
+    {
+      &quot;id&quot;: &quot;plan&quot;,
+      &quot;agent&quot;: &quot;planner&quot;,
+      &quot;name&quot;: &quot;规划 Agent&quot;,
+      &quot;description&quot;: &quot;生成标题、论点与分节大纲（含目标字数与要点）&quot;,
+      &quot;inputs&quot;: {
+        &quot;topic&quot;: &quot;inputs.topic&quot;,
+        &quot;audience&quot;: &quot;inputs.audience&quot;,
+        &quot;tone&quot;: &quot;inputs.tone&quot;,
+        &quot;sections&quot;: &quot;inputs.sections&quot;
+      },
+      &quot;params&quot;: {},
+      &quot;outputs&quot;: [
+        &quot;outline&quot;,
+        &quot;title&quot;,
+        &quot;section_count&quot;
+      ],
+      &quot;needs&quot;: [],
+      &quot;max_visits&quot;: 2,
+      &quot;timeout_s&quot;: 30,
+      &quot;retry&quot;: {
+        &quot;max_attempts&quot;: 1,
+        &quot;backoff_ms&quot;: 0,
+        &quot;multiplier&quot;: 2.0,
+        &quot;max_backoff_ms&quot;: 5000,
+        &quot;retry_on&quot;: [
+          &quot;*&quot;
+        ]
+      },
+      &quot;on_error&quot;: &quot;fail&quot;,
+      &quot;kind&quot;: &quot;author&quot;
+    },
+    {
+      &quot;id&quot;: &quot;draft&quot;,
+      &quot;agent&quot;: &quot;writer&quot;,
+      &quot;name&quot;: &quot;写作 Agent&quot;,
+      &quot;description&quot;: &quot;按大纲写稿；拿到审校意见后定向修订&quot;,
+      &quot;inputs&quot;: {
+        &quot;outline&quot;: &quot;artifacts.outline&quot;,
+        &quot;notes&quot;: {
+          &quot;ref&quot;: &quot;nodes.edit.notes&quot;,
+          &quot;default&quot;: []
+        },
+        &quot;revision&quot;: {
+          &quot;ref&quot;: &quot;nodes.edit.revision&quot;,
+          &quot;default&quot;: 0
+        }
+      },
+      &quot;params&quot;: {},
+      &quot;outputs&quot;: [
+        &quot;draft&quot;,
+        &quot;char_count&quot;,
+        &quot;draft_round&quot;,
+        &quot;revised&quot;,
+        &quot;addressed&quot;
+      ],
+      &quot;needs&quot;: [],
+      &quot;max_visits&quot;: 3,
+      &quot;timeout_s&quot;: 30,
+      &quot;retry&quot;: {
+        &quot;max_attempts&quot;: 2,
+        &quot;backoff_ms&quot;: 50,
+        &quot;multiplier&quot;: 2.0,
+        &quot;max_backoff_ms&quot;: 5000,
+        &quot;retry_on&quot;: [
+          &quot;*&quot;
+        ]
+      },
+      &quot;on_error&quot;: &quot;fail&quot;,
+      &quot;kind&quot;: &quot;author&quot;
+    },
+    {
+      &quot;id&quot;: &quot;edit&quot;,
+      &quot;agent&quot;: &quot;editor&quot;,
+      &quot;name&quot;: &quot;审校 Agent&quot;,
+      &quot;description&quot;: &quot;检查每节字数、要点覆盖、重复句与口水词&quot;,
+      &quot;inputs&quot;: {
+        &quot;draft&quot;: &quot;artifacts.draft&quot;,
+        &quot;outline&quot;: &quot;artifacts.outline&quot;
+      },
+      &quot;params&quot;: {},
+      &quot;outputs&quot;: [
+        &quot;verdict&quot;,
+        &quot;notes&quot;,
+        &quot;score&quot;,
+        &quot;revision&quot;,
+        &quot;summary&quot;,
+        &quot;metrics&quot;
+      ],
+      &quot;needs&quot;: [],
+      &quot;max_visits&quot;: 6,
+      &quot;timeout_s&quot;: 30,
+      &quot;retry&quot;: {
+        &quot;max_attempts&quot;: 1,
+        &quot;backoff_ms&quot;: 0,
+        &quot;multiplier&quot;: 2.0,
+        &quot;max_backoff_ms&quot;: 5000,
+        &quot;retry_on&quot;: [
+          &quot;*&quot;
+        ]
+      },
+      &quot;on_error&quot;: &quot;fail&quot;,
+      &quot;kind&quot;: &quot;review&quot;
+    },
+    {
+      &quot;id&quot;: &quot;publish&quot;,
+      &quot;agent&quot;: &quot;publisher&quot;,
+      &quot;name&quot;: &quot;发布 Agent&quot;,
+      &quot;description&quot;: &quot;输出终稿与发布说明&quot;,
+      &quot;inputs&quot;: {
+        &quot;draft&quot;: &quot;artifacts.draft&quot;,
+        &quot;verdict&quot;: &quot;nodes.edit.verdict&quot;,
+        &quot;score&quot;: &quot;nodes.edit.score&quot;,
+        &quot;notes&quot;: &quot;nodes.edit.notes&quot;
+      },
+      &quot;params&quot;: {},
+      &quot;outputs&quot;: [
+        &quot;document&quot;,
+        &quot;verdict&quot;,
+        &quot;char_count&quot;,
+        &quot;summary&quot;
+      ],
+      &quot;needs&quot;: [],
+      &quot;max_visits&quot;: 1,
+      &quot;timeout_s&quot;: 30,
+      &quot;retry&quot;: {
+        &quot;max_attempts&quot;: 1,
+        &quot;backoff_ms&quot;: 0,
+        &quot;multiplier&quot;: 2.0,
+        &quot;max_backoff_ms&quot;: 5000,
+        &quot;retry_on&quot;: [
+          &quot;*&quot;
+        ]
+      },
+      &quot;on_error&quot;: &quot;fail&quot;,
+      &quot;kind&quot;: &quot;deliver&quot;
+    }
+  ],
+  &quot;edges&quot;: [
+    {
+      &quot;from&quot;: &quot;plan&quot;,
+      &quot;to&quot;: &quot;draft&quot;,
+      &quot;when&quot;: null,
+      &quot;label&quot;: &quot;大纲&quot;,
+      &quot;on&quot;: &quot;success&quot;,
+      &quot;exclusive&quot;: false
+    },
+    {
+      &quot;from&quot;: &quot;draft&quot;,
+      &quot;to&quot;: &quot;edit&quot;,
+      &quot;when&quot;: null,
+      &quot;label&quot;: &quot;初稿&quot;,
+      &quot;on&quot;: &quot;success&quot;,
+      &quot;exclusive&quot;: false
+    },
+    {
+      &quot;from&quot;: &quot;edit&quot;,
+      &quot;to&quot;: &quot;draft&quot;,
+      &quot;when&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions&quot;,
+      &quot;label&quot;: &quot;需要修订&quot;,
+      &quot;on&quot;: &quot;success&quot;,
+      &quot;exclusive&quot;: false
+    },
+    {
+      &quot;from&quot;: &quot;edit&quot;,
+      &quot;to&quot;: &quot;publish&quot;,
+      &quot;when&quot;: &quot;verdict == &#x27;pass&#x27;&quot;,
+      &quot;label&quot;: &quot;审校通过&quot;,
+      &quot;on&quot;: &quot;success&quot;,
+      &quot;exclusive&quot;: false
+    },
+    {
+      &quot;from&quot;: &quot;edit&quot;,
+      &quot;to&quot;: &quot;publish&quot;,
+      &quot;when&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions&quot;,
+      &quot;label&quot;: &quot;达到修订上限&quot;,
+      &quot;on&quot;: &quot;success&quot;,
+      &quot;exclusive&quot;: false
+    }
+  ]
+}</pre></details>
+  <details><summary>state 快照（含作品历史）</summary><pre>{
+  &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+  &quot;workflow_id&quot;: &quot;content_creation&quot;,
+  &quot;workflow_name&quot;: &quot;内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布）&quot;,
+  &quot;inputs&quot;: {
+    &quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+    &quot;audience&quot;: &quot;工程团队&quot;,
+    &quot;tone&quot;: &quot;务实&quot;,
+    &quot;sections&quot;: 3,
+    &quot;max_revisions&quot;: 3
+  },
+  &quot;artifacts&quot;: {
+    &quot;outline&quot;: {
+      &quot;name&quot;: &quot;outline&quot;,
+      &quot;version&quot;: 1,
+      &quot;author&quot;: &quot;planner&quot;,
+      &quot;created_at&quot;: 1792902259.3629568,
+      &quot;updated_at&quot;: 1792902259.362957,
+      &quot;meta&quot;: {},
+      &quot;versions&quot;: [
+        {
+          &quot;version&quot;: 1,
+          &quot;author&quot;: &quot;planner&quot;,
+          &quot;ts&quot;: 1792902259.362957,
+          &quot;note&quot;: &quot;initial&quot;
+        }
+      ],
+      &quot;length&quot;: 6
+    },
+    &quot;draft&quot;: {
+      &quot;name&quot;: &quot;draft&quot;,
+      &quot;version&quot;: 2,
+      &quot;author&quot;: &quot;writer&quot;,
+      &quot;created_at&quot;: 1792902259.3661714,
+      &quot;updated_at&quot;: 1792902259.3728943,
+      &quot;meta&quot;: {},
+      &quot;versions&quot;: [
+        {
+          &quot;version&quot;: 1,
+          &quot;author&quot;: &quot;writer&quot;,
+          &quot;ts&quot;: 1792902259.3661716,
+          &quot;note&quot;: &quot;initial&quot;
+        },
+        {
+          &quot;version&quot;: 2,
+          &quot;author&quot;: &quot;writer&quot;,
+          &quot;ts&quot;: 1792902259.3728943,
+          &quot;note&quot;: &quot;第 2 稿&quot;
+        }
+      ],
+      &quot;length&quot;: 695
+    },
+    &quot;editorial_review&quot;: {
+      &quot;name&quot;: &quot;editorial_review&quot;,
+      &quot;version&quot;: 2,
+      &quot;author&quot;: &quot;editor&quot;,
+      &quot;created_at&quot;: 1792902259.3694034,
+      &quot;updated_at&quot;: 1792902259.3756802,
+      &quot;meta&quot;: {},
+      &quot;versions&quot;: [
+        {
+          &quot;version&quot;: 1,
+          &quot;author&quot;: &quot;editor&quot;,
+          &quot;ts&quot;: 1792902259.3694036,
+          &quot;note&quot;: &quot;initial&quot;
+        },
+        {
+          &quot;version&quot;: 2,
+          &quot;author&quot;: &quot;editor&quot;,
+          &quot;ts&quot;: 1792902259.3756802,
+          &quot;note&quot;: &quot;第 2 次审校：pass&quot;
+        }
+      ],
+      &quot;length&quot;: 8
+    },
+    &quot;final_document&quot;: {
+      &quot;name&quot;: &quot;final_document&quot;,
+      &quot;version&quot;: 1,
+      &quot;author&quot;: &quot;publisher&quot;,
+      &quot;created_at&quot;: 1792902259.378922,
+      &quot;updated_at&quot;: 1792902259.3789222,
+      &quot;meta&quot;: {
+        &quot;filename&quot;: &quot;final_document.md&quot;
+      },
+      &quot;versions&quot;: [
+        {
+          &quot;version&quot;: 1,
+          &quot;author&quot;: &quot;publisher&quot;,
+          &quot;ts&quot;: 1792902259.3789222,
+          &quot;note&quot;: &quot;initial&quot;
+        }
+      ],
+      &quot;length&quot;: 750
+    },
+    &quot;publish_note&quot;: {
+      &quot;name&quot;: &quot;publish_note&quot;,
+      &quot;version&quot;: 1,
+      &quot;author&quot;: &quot;publisher&quot;,
+      &quot;created_at&quot;: 1792902259.3789277,
+      &quot;updated_at&quot;: 1792902259.378928,
+      &quot;meta&quot;: {},
+      &quot;versions&quot;: [
+        {
+          &quot;version&quot;: 1,
+          &quot;author&quot;: &quot;publisher&quot;,
+          &quot;ts&quot;: 1792902259.378928,
+          &quot;note&quot;: &quot;initial&quot;
+        }
+      ],
+      &quot;length&quot;: 4
+    }
+  },
+  &quot;variables&quot;: {
+    &quot;editor_verdict&quot;: &quot;pass&quot;,
+    &quot;revision&quot;: 2
+  },
+  &quot;counters&quot;: {
+    &quot;step&quot;: 6,
+    &quot;draft_round&quot;: 2
+  },
+  &quot;node_runs&quot;: [
+    {
+      &quot;node_id&quot;: &quot;plan&quot;,
+      &quot;agent&quot;: &quot;planner&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;wave&quot;: 1,
+      &quot;started_at&quot;: 1792902259.3627627,
+      &quot;ended_at&quot;: 1792902259.362999,
+      &quot;duration_ms&quot;: 0.24,
+      &quot;error&quot;: null,
+      &quot;outputs&quot;: {
+        &quot;outline&quot;: {
+          &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;,
+          &quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+          &quot;audience&quot;: &quot;工程团队&quot;,
+          &quot;tone&quot;: &quot;务实&quot;,
+          &quot;thesis&quot;: &quot;围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。&quot;,
+          &quot;sections&quot;: [
+            {
+              &quot;heading&quot;: &quot;背景与问题&quot;,
+              &quot;key_points&quot;: [
+                &quot;为什么现在要做这件事&quot;,
+                &quot;当前痛点与影响范围&quot;
+              ],
+              &quot;char_target&quot;: 150
+            },
+            {
+              &quot;heading&quot;: &quot;方案与做法&quot;,
+              &quot;key_points&quot;: [
+                &quot;核心设计取舍&quot;,
+                &quot;关键实现步骤&quot;
+              ],
+              &quot;char_target&quot;: 150
+            },
+            {
+              &quot;heading&quot;: &quot;落地与验证&quot;,
+              &quot;key_points&quot;: [
+                &quot;如何度量效果&quot;,
+                &quot;风险与回滚方案&quot;
+              ],
+              &quot;char_target&quot;: 150
+            }
+          ]
+        },
+        &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;,
+        &quot;section_count&quot;: 3
+      },
+      &quot;logs&quot;: [],
+      &quot;meta&quot;: {}
+    },
+    {
+      &quot;node_id&quot;: &quot;draft&quot;,
+      &quot;agent&quot;: &quot;writer&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;wave&quot;: 2,
+      &quot;started_at&quot;: 1792902259.365766,
+      &quot;ended_at&quot;: 1792902259.3662293,
+      &quot;duration_ms&quot;: 0.46,
+      &quot;error&quot;: null,
+      &quot;outputs&quot;: {
+        &quot;draft&quot;: &quot;# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明\n\n&gt; 读者：工程团队　语气：务实\n\n围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。\n\n## 背景与问题\n\n背景与问题是本方案的核心环节，重点在于为什么现在要做这件事。\n\n## 方案与做法\n\n方案与做法是本方案的核心环节，重点在于核心设计取舍。\n\n## 落地与验证\n\n落地与验证是本方案的核心环节，重点在于如何度量效果。\n&quot;,
+        &quot;char_count&quot;: 181,
+        &quot;draft_round&quot;: 1,
+        &quot;revised&quot;: false,
+        &quot;addressed&quot;: []
+      },
+      &quot;logs&quot;: [],
+      &quot;meta&quot;: {
+        &quot;notes_applied&quot;: 0
+      }
+    },
+    {
+      &quot;node_id&quot;: &quot;edit&quot;,
+      &quot;agent&quot;: &quot;editor&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;wave&quot;: 3,
+      &quot;started_at&quot;: 1792902259.3689725,
+      &quot;ended_at&quot;: 1792902259.3694427,
+      &quot;duration_ms&quot;: 0.47,
+      &quot;error&quot;: null,
+      &quot;outputs&quot;: {
+        &quot;verdict&quot;: &quot;needs_revision&quot;,
+        &quot;notes&quot;: [
+          {
+            &quot;type&quot;: &quot;expand&quot;,
+            &quot;heading&quot;: &quot;背景与问题&quot;,
+            &quot;target&quot;: 150,
+            &quot;message&quot;: &quot;「背景与问题」仅 30 字，需扩写到 150 字左右&quot;
+          },
+          {
+            &quot;type&quot;: &quot;add-point&quot;,
+            &quot;heading&quot;: &quot;背景与问题&quot;,
+            &quot;point&quot;: &quot;当前痛点与影响范围&quot;,
+            &quot;message&quot;: &quot;「背景与问题」缺少要点：当前痛点与影响范围&quot;
+          },
+          {
+            &quot;type&quot;: &quot;expand&quot;,
+            &quot;heading&quot;: &quot;方案与做法&quot;,
+            &quot;target&quot;: 150,
+            &quot;message&quot;: &quot;「方案与做法」仅 26 字，需扩写到 150 字左右&quot;
+          },
+          {
+            &quot;type&quot;: &quot;add-point&quot;,
+            &quot;heading&quot;: &quot;方案与做法&quot;,
+            &quot;point&quot;: &quot;关键实现步骤&quot;,
+            &quot;message&quot;: &quot;「方案与做法」缺少要点：关键实现步骤&quot;
+          },
+          {
+            &quot;type&quot;: &quot;expand&quot;,
+            &quot;heading&quot;: &quot;落地与验证&quot;,
+            &quot;target&quot;: 150,
+            &quot;message&quot;: &quot;「落地与验证」仅 26 字，需扩写到 150 字左右&quot;
+          },
+          {
+            &quot;type&quot;: &quot;add-point&quot;,
+            &quot;heading&quot;: &quot;落地与验证&quot;,
+            &quot;point&quot;: &quot;风险与回滚方案&quot;,
+            &quot;message&quot;: &quot;「落地与验证」缺少要点：风险与回滚方案&quot;
+          }
+        ],
+        &quot;score&quot;: 11,
+        &quot;revision&quot;: 1,
+        &quot;summary&quot;: &quot;第 1 次审校：needs_revision（6 条待改，评分 11）&quot;,
+        &quot;metrics&quot;: [
+          {
+            &quot;heading&quot;: &quot;背景与问题&quot;,
+            &quot;chars&quot;: 30,
+            &quot;target&quot;: 150,
+            &quot;missing_points&quot;: [
+              &quot;当前痛点与影响范围&quot;
+            ]
+          },
+          {
+            &quot;heading&quot;: &quot;方案与做法&quot;,
+            &quot;chars&quot;: 26,
+            &quot;target&quot;: 150,
+            &quot;missing_points&quot;: [
+              &quot;关键实现步骤&quot;
+            ]
+          },
+          {
+            &quot;heading&quot;: &quot;落地与验证&quot;,
+            &quot;chars&quot;: 26,
+            &quot;target&quot;: 150,
+            &quot;missing_points&quot;: [
+              &quot;风险与回滚方案&quot;
+            ]
+          }
+        ]
+      },
+      &quot;logs&quot;: [],
+      &quot;meta&quot;: {
+        &quot;notes&quot;: 6
+      }
+    },
+    {
+      &quot;node_id&quot;: &quot;draft&quot;,
+      &quot;agent&quot;: &quot;writer&quot;,
+      &quot;visit&quot;: 2,
+      &quot;attempt&quot;: 1,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;wave&quot;: 4,
+      &quot;started_at&quot;: 1792902259.3726428,
+      &quot;ended_at&quot;: 1792902259.3729439,
+      &quot;duration_ms&quot;: 0.3,
+      &quot;error&quot;: null,
+      &quot;outputs&quot;: {
+        &quot;draft&quot;: &quot;# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明\n\n&gt; 读者：工程团队　语气：务实\n\n围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。\n\n## 背景与问题\n\n为什么现在要做这件事是本节需要说明的关键点。当前痛点与影响范围是本节需要说明的关键点。关于背景与问题，实现上优先使用标准库，避免引入额外依赖。关于背景与问题，调用方需要关注返回值与异常分支，必要时记录日志。关于背景与问题，该能力在测试环境覆盖了典型输入与边界输入。关于背景与问题，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于背景与问题，上线前建议补充监控指标，便于定位问题。\n\n## 方案与做法\n\n核心设计取舍是本节需要说明的关键点。关键实现步骤是本节需要说明的关键点。关于方案与做法，实现上优先使用标准库，避免引入额外依赖。关于方案与做法，调用方需要关注返回值与异常分支，必要时记录日志。关于方案与做法，该能力在测试环境覆盖了典型输入与边界输入。关于方案与做法，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于方案与做法，上线前建议补充监控指标，便于定位问题。\n\n## 落地与验证\n\n如何度量效果是本节需要说明的关键点。风险与回滚方案是本节需要说明的关键点。关于落地与验证，实现上优先使用标准库，避免引入额外依赖。关于落地与验证，调用方需要关注返回值与异常分支，必要时记录日志。关于落地与验证，该能力在测试环境覆盖了典型输入与边界输入。关于落地与验证，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于落地与验证，上线前建议补充监控指标，便于定位问题。\n&quot;,
+        &quot;char_count&quot;: 668,
+        &quot;draft_round&quot;: 2,
+        &quot;revised&quot;: true,
+        &quot;addressed&quot;: [
+          &quot;「背景与问题」仅 30 字，需扩写到 150 字左右&quot;,
+          &quot;「背景与问题」缺少要点：当前痛点与影响范围&quot;,
+          &quot;「方案与做法」仅 26 字，需扩写到 150 字左右&quot;,
+          &quot;「方案与做法」缺少要点：关键实现步骤&quot;,
+          &quot;「落地与验证」仅 26 字，需扩写到 150 字左右&quot;,
+          &quot;「落地与验证」缺少要点：风险与回滚方案&quot;
+        ]
+      },
+      &quot;logs&quot;: [],
+      &quot;meta&quot;: {
+        &quot;notes_applied&quot;: 6
+      }
+    },
+    {
+      &quot;node_id&quot;: &quot;edit&quot;,
+      &quot;agent&quot;: &quot;editor&quot;,
+      &quot;visit&quot;: 2,
+      &quot;attempt&quot;: 1,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;wave&quot;: 5,
+      &quot;started_at&quot;: 1792902259.3754287,
+      &quot;ended_at&quot;: 1792902259.375714,
+      &quot;duration_ms&quot;: 0.29,
+      &quot;error&quot;: null,
+      &quot;outputs&quot;: {
+        &quot;verdict&quot;: &quot;pass&quot;,
+        &quot;notes&quot;: [],
+        &quot;score&quot;: 100,
+        &quot;revision&quot;: 2,
+        &quot;summary&quot;: &quot;第 2 次审校：pass（0 条待改，评分 100）&quot;,
+        &quot;metrics&quot;: [
+          {
+            &quot;heading&quot;: &quot;背景与问题&quot;,
+            &quot;chars&quot;: 194,
+            &quot;target&quot;: 150,
+            &quot;missing_points&quot;: []
+          },
+          {
+            &quot;heading&quot;: &quot;方案与做法&quot;,
+            &quot;chars&quot;: 187,
+            &quot;target&quot;: 150,
+            &quot;missing_points&quot;: []
+          },
+          {
+            &quot;heading&quot;: &quot;落地与验证&quot;,
+            &quot;chars&quot;: 188,
+            &quot;target&quot;: 150,
+            &quot;missing_points&quot;: []
+          }
+        ]
+      },
+      &quot;logs&quot;: [],
+      &quot;meta&quot;: {
+        &quot;notes&quot;: 0
+      }
+    },
+    {
+      &quot;node_id&quot;: &quot;publish&quot;,
+      &quot;agent&quot;: &quot;publisher&quot;,
+      &quot;visit&quot;: 1,
+      &quot;attempt&quot;: 1,
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;wave&quot;: 6,
+      &quot;started_at&quot;: 1792902259.378754,
+      &quot;ended_at&quot;: 1792902259.3789775,
+      &quot;duration_ms&quot;: 0.22,
+      &quot;error&quot;: null,
+      &quot;outputs&quot;: {
+        &quot;document&quot;: &quot;# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明\n\n&gt; 读者：工程团队　语气：务实\n\n围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。\n\n## 背景与问题\n\n为什么现在要做这件事是本节需要说明的关键点。当前痛点与影响范围是本节需要说明的关键点。关于背景与问题，实现上优先使用标准库，避免引入额外依赖。关于背景与问题，调用方需要关注返回值与异常分支，必要时记录日志。关于背景与问题，该能力在测试环境覆盖了典型输入与边界输入。关于背景与问题，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于背景与问题，上线前建议补充监控指标，便于定位问题。\n\n## 方案与做法\n\n核心设计取舍是本节需要说明的关键点。关键实现步骤是本节需要说明的关键点。关于方案与做法，实现上优先使用标准库，避免引入额外依赖。关于方案与做法，调用方需要关注返回值与异常分支，必要时记录日志。关于方案与做法，该能力在测试环境覆盖了典型输入与边界输入。关于方案与做法，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于方案与做法，上线前建议补充监控指标，便于定位问题。\n\n## 落地与验证\n\n如何度量效果是本节需要说明的关键点。风险与回滚方案是本节需要说明的关键点。关于落地与验证，实现上优先使用标准库，避免引入额外依赖。关于落地与验证，调用方需要关注返回值与异常分支，必要时记录日志。关于落地与验证，该能力在测试环境覆盖了典型输入与边界输入。关于落地与验证，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于落地与验证，上线前建议补充监控指标，便于定位问题。\n\n---\n\n&gt; 审校结论：**pass**（评分 100）；修订过程中处理意见 0 条；全文约 668 字。\n&quot;,
+        &quot;verdict&quot;: &quot;pass&quot;,
+        &quot;char_count&quot;: 668,
+        &quot;summary&quot;: &quot;终稿 668 字，可直接发布&quot;
+      },
+      &quot;logs&quot;: [],
+      &quot;meta&quot;: {}
+    }
+  ],
+  &quot;messages&quot;: [
+    {
+      &quot;id&quot;: &quot;m0017&quot;,
+      &quot;ts&quot;: 1792902259.3629656,
+      &quot;sender&quot;: &quot;plan&quot;,
+      &quot;recipient&quot;: &quot;writer&quot;,
+      &quot;kind&quot;: &quot;handoff&quot;,
+      &quot;payload&quot;: {
+        &quot;summary&quot;: &quot;大纲完成：3 个小节&quot;,
+        &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;
+      },
+      &quot;correlation_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+      &quot;reply_to&quot;: null,
+      &quot;tags&quot;: [
+        &quot;outline&quot;
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;m0018&quot;,
+      &quot;ts&quot;: 1792902259.3661814,
+      &quot;sender&quot;: &quot;draft&quot;,
+      &quot;recipient&quot;: &quot;editor&quot;,
+      &quot;kind&quot;: &quot;handoff&quot;,
+      &quot;payload&quot;: {
+        &quot;summary&quot;: &quot;第 1 稿完成（181 字）&quot;,
+        &quot;revised&quot;: false
+      },
+      &quot;correlation_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+      &quot;reply_to&quot;: null,
+      &quot;tags&quot;: [
+        &quot;draft&quot;,
+        &quot;round-1&quot;
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;m0019&quot;,
+      &quot;ts&quot;: 1792902259.3694096,
+      &quot;sender&quot;: &quot;edit&quot;,
+      &quot;recipient&quot;: &quot;writer&quot;,
+      &quot;kind&quot;: &quot;feedback&quot;,
+      &quot;payload&quot;: {
+        &quot;summary&quot;: &quot;审校结论 needs_revision（6 条阻塞意见）&quot;,
+        &quot;notes&quot;: 6
+      },
+      &quot;correlation_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+      &quot;reply_to&quot;: null,
+      &quot;tags&quot;: [
+        &quot;review&quot;,
+        &quot;round-1&quot;
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;m0020&quot;,
+      &quot;ts&quot;: 1792902259.3729,
+      &quot;sender&quot;: &quot;draft&quot;,
+      &quot;recipient&quot;: &quot;editor&quot;,
+      &quot;kind&quot;: &quot;handoff&quot;,
+      &quot;payload&quot;: {
+        &quot;summary&quot;: &quot;第 2 稿完成（668 字）&quot;,
+        &quot;revised&quot;: true
+      },
+      &quot;correlation_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+      &quot;reply_to&quot;: null,
+      &quot;tags&quot;: [
+        &quot;draft&quot;,
+        &quot;round-2&quot;
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;m0021&quot;,
+      &quot;ts&quot;: 1792902259.375684,
+      &quot;sender&quot;: &quot;edit&quot;,
+      &quot;recipient&quot;: &quot;writer&quot;,
+      &quot;kind&quot;: &quot;feedback&quot;,
+      &quot;payload&quot;: {
+        &quot;summary&quot;: &quot;审校结论 pass（0 条阻塞意见）&quot;,
+        &quot;notes&quot;: 0
+      },
+      &quot;correlation_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+      &quot;reply_to&quot;: null,
+      &quot;tags&quot;: [
+        &quot;review&quot;,
+        &quot;round-2&quot;
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;m0022&quot;,
+      &quot;ts&quot;: 1792902259.3789332,
+      &quot;sender&quot;: &quot;publish&quot;,
+      &quot;recipient&quot;: &quot;user&quot;,
+      &quot;kind&quot;: &quot;result&quot;,
+      &quot;payload&quot;: {
+        &quot;summary&quot;: &quot;终稿 668 字，可直接发布&quot;
+      },
+      &quot;correlation_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+      &quot;reply_to&quot;: null,
+      &quot;tags&quot;: [
+        &quot;delivery&quot;
+      ]
+    }
+  ],
+  &quot;status&quot;: &quot;passed&quot;,
+  &quot;error&quot;: null,
+  &quot;notes&quot;: [],
+  &quot;created_at&quot;: 1792902259.3627284,
+  &quot;updated_at&quot;: 1792902259.378929
+}</pre></details>
+  <details><summary>完整事件流 (events)</summary><pre>[
+  {
+    &quot;seq&quot;: 1,
+    &quot;ts&quot;: 1792902259.362744,
+    &quot;type&quot;: &quot;run_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;workflow&quot;: &quot;content_creation&quot;,
+    &quot;workflow_name&quot;: &quot;内容创作流程（主题 → 大纲 → 初稿 → 审校 → 修订 → 发布）&quot;,
+    &quot;node_count&quot;: 4,
+    &quot;edge_count&quot;: 5,
+    &quot;inputs&quot;: {
+      &quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+      &quot;audience&quot;: &quot;工程团队&quot;,
+      &quot;tone&quot;: &quot;务实&quot;,
+      &quot;sections&quot;: 3,
+      &quot;max_revisions&quot;: 3
+    },
+    &quot;resumed&quot;: false
+  },
+  {
+    &quot;seq&quot;: 2,
+    &quot;ts&quot;: 1792902259.3627558,
+    &quot;type&quot;: &quot;wave_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 1,
+    &quot;nodes&quot;: [
+      &quot;plan&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 3,
+    &quot;ts&quot;: 1792902259.3627646,
+    &quot;type&quot;: &quot;node_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;plan&quot;,
+    &quot;agent&quot;: &quot;planner&quot;,
+    &quot;name&quot;: &quot;规划 Agent&quot;,
+    &quot;visit&quot;: 1,
+    &quot;wave&quot;: 1,
+    &quot;kind&quot;: &quot;author&quot;
+  },
+  {
+    &quot;seq&quot;: 4,
+    &quot;ts&quot;: 1792902259.3630052,
+    &quot;type&quot;: &quot;message&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;message_id&quot;: &quot;m0017&quot;,
+    &quot;sender&quot;: &quot;plan&quot;,
+    &quot;recipient&quot;: &quot;writer&quot;,
+    &quot;kind&quot;: &quot;handoff&quot;,
+    &quot;summary&quot;: &quot;[handoff] plan → writer: 大纲完成：3 个小节&quot;,
+    &quot;payload&quot;: {
+      &quot;summary&quot;: &quot;大纲完成：3 个小节&quot;,
+      &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;
+    }
+  },
+  {
+    &quot;seq&quot;: 5,
+    &quot;ts&quot;: 1792902259.363037,
+    &quot;type&quot;: &quot;node_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;plan&quot;,
+    &quot;agent&quot;: &quot;planner&quot;,
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;duration_ms&quot;: 0.24,
+    &quot;visit&quot;: 1,
+    &quot;attempt&quot;: 1,
+    &quot;detail&quot;: &quot;outline={&#x27;title&#x27;: &#x27;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&#x27;, &#x27;topic&#x27;: &#x27;多 Agent 工作流在企业内部的落地&#x27;, &#x27;audience&#x27;: &#x27;工程团队&#x27;, &#x27;tone&#x27;: &#x27;务实&#x27;, &#x27;thesis&#x27;: &#x27;围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。&#x27;, &#x27;sections&#x27;: [{&#x27;heading&#x27;: &#x27;背景与问题&#x27;, &#x27;key_points&#x27;: [&#x27;为什么现在要做这件事&#x27;, &#x27;当前痛点与影响范围&#x27;], &#x27;char_target&#x27;: 150}, {&#x27;heading&#x27;: &#x27;方案与做法&#x27;, &#x27;key_points&#x27;: [&#x27;核心设计取舍&#x27;, &#x27;关键实现步骤&#x27;], &#x27;char_target&#x27;: 150}, {&#x27;heading&#x27;: &#x27;落地与验证&#x27;, &#x27;key_points&#x27;: [&#x27;如何度量效果&#x27;, &#x27;风险与回滚方案&#x27;], &#x27;char_target&#x27;: 150}]} title=多 Agent 工作流在企业内部的落地：面向工程团队的实践说明 section_count=3&quot;,
+    &quot;outputs&quot;: {
+      &quot;outline&quot;: {
+        &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;,
+        &quot;topic&quot;: &quot;多 Agent 工作流在企业内部的落地&quot;,
+        &quot;audience&quot;: &quot;工程团队&quot;,
+        &quot;tone&quot;: &quot;务实&quot;,
+        &quot;thesis&quot;: &quot;围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。&quot;,
+        &quot;sections&quot;: [
+          {
+            &quot;heading&quot;: &quot;背景与问题&quot;,
+            &quot;key_points&quot;: [
+              &quot;为什么现在要做这件事&quot;,
+              &quot;当前痛点与影响范围&quot;
+            ],
+            &quot;char_target&quot;: 150
+          },
+          {
+            &quot;heading&quot;: &quot;方案与做法&quot;,
+            &quot;key_points&quot;: [
+              &quot;核心设计取舍&quot;,
+              &quot;关键实现步骤&quot;
+            ],
+            &quot;char_target&quot;: 150
+          },
+          {
+            &quot;heading&quot;: &quot;落地与验证&quot;,
+            &quot;key_points&quot;: [
+              &quot;如何度量效果&quot;,
+              &quot;风险与回滚方案&quot;
+            ],
+            &quot;char_target&quot;: 150
+          }
+        ]
+      },
+      &quot;title&quot;: &quot;多 Agent 工作流在企业内部的落地：面向工程团队的实践说明&quot;,
+      &quot;section_count&quot;: 3
+    },
+    &quot;logs&quot;: [],
+    &quot;meta&quot;: {}
+  },
+  {
+    &quot;seq&quot;: 6,
+    &quot;ts&quot;: 1792902259.3630576,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;plan&quot;,
+    &quot;target&quot;: &quot;draft&quot;,
+    &quot;label&quot;: &quot;大纲&quot;,
+    &quot;when&quot;: null,
+    &quot;fired&quot;: true,
+    &quot;reason&quot;: &quot;无条件&quot;
+  },
+  {
+    &quot;seq&quot;: 7,
+    &quot;ts&quot;: 1792902259.3657377,
+    &quot;type&quot;: &quot;checkpoint&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 1,
+    &quot;step&quot;: 1,
+    &quot;frontier&quot;: [
+      &quot;draft&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 8,
+    &quot;ts&quot;: 1792902259.365748,
+    &quot;type&quot;: &quot;wave_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 2,
+    &quot;nodes&quot;: [
+      &quot;draft&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 9,
+    &quot;ts&quot;: 1792902259.3657703,
+    &quot;type&quot;: &quot;node_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;draft&quot;,
+    &quot;agent&quot;: &quot;writer&quot;,
+    &quot;name&quot;: &quot;写作 Agent&quot;,
+    &quot;visit&quot;: 1,
+    &quot;wave&quot;: 2,
+    &quot;kind&quot;: &quot;author&quot;
+  },
+  {
+    &quot;seq&quot;: 10,
+    &quot;ts&quot;: 1792902259.3662412,
+    &quot;type&quot;: &quot;message&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;message_id&quot;: &quot;m0018&quot;,
+    &quot;sender&quot;: &quot;draft&quot;,
+    &quot;recipient&quot;: &quot;editor&quot;,
+    &quot;kind&quot;: &quot;handoff&quot;,
+    &quot;summary&quot;: &quot;[handoff] draft → editor: 第 1 稿完成（181 字）&quot;,
+    &quot;payload&quot;: {
+      &quot;summary&quot;: &quot;第 1 稿完成（181 字）&quot;,
+      &quot;revised&quot;: false
+    }
+  },
+  {
+    &quot;seq&quot;: 11,
+    &quot;ts&quot;: 1792902259.3662672,
+    &quot;type&quot;: &quot;node_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;draft&quot;,
+    &quot;agent&quot;: &quot;writer&quot;,
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;duration_ms&quot;: 0.46,
+    &quot;visit&quot;: 1,
+    &quot;attempt&quot;: 1,
+    &quot;detail&quot;: &quot;draft=# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明  &gt; 读者：… char_count=181 draft_round=1 revised=False&quot;,
+    &quot;outputs&quot;: {
+      &quot;draft&quot;: &quot;# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明\n\n&gt; 读者：工程团队　语气：务实\n\n围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。\n\n## 背景与问题\n\n背景与问题是本方案的核心环节，重点在于为什么现在要做这件事。\n\n## 方案与做法\n\n方案与做法是本方案的核心环节，重点在于核心设计取舍。\n\n## 落地与验证\n\n落地与验证是本方案的核心环节，重点在于如何度量效果。\n&quot;,
+      &quot;char_count&quot;: 181,
+      &quot;draft_round&quot;: 1,
+      &quot;revised&quot;: false,
+      &quot;addressed&quot;: []
+    },
+    &quot;logs&quot;: [],
+    &quot;meta&quot;: {
+      &quot;notes_applied&quot;: 0
+    }
+  },
+  {
+    &quot;seq&quot;: 12,
+    &quot;ts&quot;: 1792902259.366294,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;draft&quot;,
+    &quot;target&quot;: &quot;edit&quot;,
+    &quot;label&quot;: &quot;初稿&quot;,
+    &quot;when&quot;: null,
+    &quot;fired&quot;: true,
+    &quot;reason&quot;: &quot;无条件&quot;
+  },
+  {
+    &quot;seq&quot;: 13,
+    &quot;ts&quot;: 1792902259.3689554,
+    &quot;type&quot;: &quot;checkpoint&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 2,
+    &quot;step&quot;: 2,
+    &quot;frontier&quot;: [
+      &quot;edit&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 14,
+    &quot;ts&quot;: 1792902259.3689618,
+    &quot;type&quot;: &quot;wave_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 3,
+    &quot;nodes&quot;: [
+      &quot;edit&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 15,
+    &quot;ts&quot;: 1792902259.368975,
+    &quot;type&quot;: &quot;node_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;edit&quot;,
+    &quot;agent&quot;: &quot;editor&quot;,
+    &quot;name&quot;: &quot;审校 Agent&quot;,
+    &quot;visit&quot;: 1,
+    &quot;wave&quot;: 3,
+    &quot;kind&quot;: &quot;review&quot;
+  },
+  {
+    &quot;seq&quot;: 16,
+    &quot;ts&quot;: 1792902259.369459,
+    &quot;type&quot;: &quot;message&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;message_id&quot;: &quot;m0019&quot;,
+    &quot;sender&quot;: &quot;edit&quot;,
+    &quot;recipient&quot;: &quot;writer&quot;,
+    &quot;kind&quot;: &quot;feedback&quot;,
+    &quot;summary&quot;: &quot;[feedback] edit → writer: 审校结论 needs_revision（6 条阻塞意见）&quot;,
+    &quot;payload&quot;: {
+      &quot;summary&quot;: &quot;审校结论 needs_revision（6 条阻塞意见）&quot;,
+      &quot;notes&quot;: 6
+    }
+  },
+  {
+    &quot;seq&quot;: 17,
+    &quot;ts&quot;: 1792902259.369502,
+    &quot;type&quot;: &quot;node_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;edit&quot;,
+    &quot;agent&quot;: &quot;editor&quot;,
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;duration_ms&quot;: 0.47,
+    &quot;visit&quot;: 1,
+    &quot;attempt&quot;: 1,
+    &quot;detail&quot;: &quot;verdict=needs_revision notes=6项 score=11 revision=1&quot;,
+    &quot;outputs&quot;: {
+      &quot;verdict&quot;: &quot;needs_revision&quot;,
+      &quot;notes&quot;: [
+        {
+          &quot;type&quot;: &quot;expand&quot;,
+          &quot;heading&quot;: &quot;背景与问题&quot;,
+          &quot;target&quot;: 150,
+          &quot;message&quot;: &quot;「背景与问题」仅 30 字，需扩写到 150 字左右&quot;
+        },
+        {
+          &quot;type&quot;: &quot;add-point&quot;,
+          &quot;heading&quot;: &quot;背景与问题&quot;,
+          &quot;point&quot;: &quot;当前痛点与影响范围&quot;,
+          &quot;message&quot;: &quot;「背景与问题」缺少要点：当前痛点与影响范围&quot;
+        },
+        {
+          &quot;type&quot;: &quot;expand&quot;,
+          &quot;heading&quot;: &quot;方案与做法&quot;,
+          &quot;target&quot;: 150,
+          &quot;message&quot;: &quot;「方案与做法」仅 26 字，需扩写到 150 字左右&quot;
+        },
+        {
+          &quot;type&quot;: &quot;add-point&quot;,
+          &quot;heading&quot;: &quot;方案与做法&quot;,
+          &quot;point&quot;: &quot;关键实现步骤&quot;,
+          &quot;message&quot;: &quot;「方案与做法」缺少要点：关键实现步骤&quot;
+        },
+        {
+          &quot;type&quot;: &quot;expand&quot;,
+          &quot;heading&quot;: &quot;落地与验证&quot;,
+          &quot;target&quot;: 150,
+          &quot;message&quot;: &quot;「落地与验证」仅 26 字，需扩写到 150 字左右&quot;
+        },
+        {
+          &quot;type&quot;: &quot;add-point&quot;,
+          &quot;heading&quot;: &quot;落地与验证&quot;,
+          &quot;point&quot;: &quot;风险与回滚方案&quot;,
+          &quot;message&quot;: &quot;「落地与验证」缺少要点：风险与回滚方案&quot;
+        }
+      ],
+      &quot;score&quot;: 11,
+      &quot;revision&quot;: 1,
+      &quot;summary&quot;: &quot;第 1 次审校：needs_revision（6 条待改，评分 11）&quot;,
+      &quot;metrics&quot;: [
+        {
+          &quot;heading&quot;: &quot;背景与问题&quot;,
+          &quot;chars&quot;: 30,
+          &quot;target&quot;: 150,
+          &quot;missing_points&quot;: [
+            &quot;当前痛点与影响范围&quot;
+          ]
+        },
+        {
+          &quot;heading&quot;: &quot;方案与做法&quot;,
+          &quot;chars&quot;: 26,
+          &quot;target&quot;: 150,
+          &quot;missing_points&quot;: [
+            &quot;关键实现步骤&quot;
+          ]
+        },
+        {
+          &quot;heading&quot;: &quot;落地与验证&quot;,
+          &quot;chars&quot;: 26,
+          &quot;target&quot;: 150,
+          &quot;missing_points&quot;: [
+            &quot;风险与回滚方案&quot;
+          ]
+        }
+      ]
+    },
+    &quot;logs&quot;: [],
+    &quot;meta&quot;: {
+      &quot;notes&quot;: 6
+    }
+  },
+  {
+    &quot;seq&quot;: 18,
+    &quot;ts&quot;: 1792902259.3696053,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;edit&quot;,
+    &quot;target&quot;: &quot;draft&quot;,
+    &quot;label&quot;: &quot;需要修订&quot;,
+    &quot;when&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions&quot;,
+    &quot;fired&quot;: true,
+    &quot;reason&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions =&gt; True&quot;
+  },
+  {
+    &quot;seq&quot;: 19,
+    &quot;ts&quot;: 1792902259.3696318,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;edit&quot;,
+    &quot;target&quot;: &quot;publish&quot;,
+    &quot;label&quot;: &quot;审校通过&quot;,
+    &quot;when&quot;: &quot;verdict == &#x27;pass&#x27;&quot;,
+    &quot;fired&quot;: false,
+    &quot;reason&quot;: &quot;verdict == &#x27;pass&#x27; =&gt; False&quot;
+  },
+  {
+    &quot;seq&quot;: 20,
+    &quot;ts&quot;: 1792902259.36967,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;edit&quot;,
+    &quot;target&quot;: &quot;publish&quot;,
+    &quot;label&quot;: &quot;达到修订上限&quot;,
+    &quot;when&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions&quot;,
+    &quot;fired&quot;: false,
+    &quot;reason&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions =&gt; False&quot;
+  },
+  {
+    &quot;seq&quot;: 21,
+    &quot;ts&quot;: 1792902259.372622,
+    &quot;type&quot;: &quot;checkpoint&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 3,
+    &quot;step&quot;: 3,
+    &quot;frontier&quot;: [
+      &quot;draft&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 22,
+    &quot;ts&quot;: 1792902259.3726296,
+    &quot;type&quot;: &quot;wave_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 4,
+    &quot;nodes&quot;: [
+      &quot;draft&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 23,
+    &quot;ts&quot;: 1792902259.3726454,
+    &quot;type&quot;: &quot;node_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;draft&quot;,
+    &quot;agent&quot;: &quot;writer&quot;,
+    &quot;name&quot;: &quot;写作 Agent&quot;,
+    &quot;visit&quot;: 2,
+    &quot;wave&quot;: 4,
+    &quot;kind&quot;: &quot;author&quot;
+  },
+  {
+    &quot;seq&quot;: 24,
+    &quot;ts&quot;: 1792902259.3729548,
+    &quot;type&quot;: &quot;message&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;message_id&quot;: &quot;m0020&quot;,
+    &quot;sender&quot;: &quot;draft&quot;,
+    &quot;recipient&quot;: &quot;editor&quot;,
+    &quot;kind&quot;: &quot;handoff&quot;,
+    &quot;summary&quot;: &quot;[handoff] draft → editor: 第 2 稿完成（668 字）&quot;,
+    &quot;payload&quot;: {
+      &quot;summary&quot;: &quot;第 2 稿完成（668 字）&quot;,
+      &quot;revised&quot;: true
+    }
+  },
+  {
+    &quot;seq&quot;: 25,
+    &quot;ts&quot;: 1792902259.3729799,
+    &quot;type&quot;: &quot;node_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;draft&quot;,
+    &quot;agent&quot;: &quot;writer&quot;,
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;duration_ms&quot;: 0.3,
+    &quot;visit&quot;: 2,
+    &quot;attempt&quot;: 1,
+    &quot;detail&quot;: &quot;draft=# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明  &gt; 读者：… char_count=668 draft_round=2 revised=True&quot;,
+    &quot;outputs&quot;: {
+      &quot;draft&quot;: &quot;# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明\n\n&gt; 读者：工程团队　语气：务实\n\n围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。\n\n## 背景与问题\n\n为什么现在要做这件事是本节需要说明的关键点。当前痛点与影响范围是本节需要说明的关键点。关于背景与问题，实现上优先使用标准库，避免引入额外依赖。关于背景与问题，调用方需要关注返回值与异常分支，必要时记录日志。关于背景与问题，该能力在测试环境覆盖了典型输入与边界输入。关于背景与问题，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于背景与问题，上线前建议补充监控指标，便于定位问题。\n\n## 方案与做法\n\n核心设计取舍是本节需要说明的关键点。关键实现步骤是本节需要说明的关键点。关于方案与做法，实现上优先使用标准库，避免引入额外依赖。关于方案与做法，调用方需要关注返回值与异常分支，必要时记录日志。关于方案与做法，该能力在测试环境覆盖了典型输入与边界输入。关于方案与做法，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于方案与做法，上线前建议补充监控指标，便于定位问题。\n\n## 落地与验证\n\n如何度量效果是本节需要说明的关键点。风险与回滚方案是本节需要说明的关键点。关于落地与验证，实现上优先使用标准库，避免引入额外依赖。关于落地与验证，调用方需要关注返回值与异常分支，必要时记录日志。关于落地与验证，该能力在测试环境覆盖了典型输入与边界输入。关于落地与验证，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于落地与验证，上线前建议补充监控指标，便于定位问题。\n&quot;,
+      &quot;char_count&quot;: 668,
+      &quot;draft_round&quot;: 2,
+      &quot;revised&quot;: true,
+      &quot;addressed&quot;: [
+        &quot;「背景与问题」仅 30 字，需扩写到 150 字左右&quot;,
+        &quot;「背景与问题」缺少要点：当前痛点与影响范围&quot;,
+        &quot;「方案与做法」仅 26 字，需扩写到 150 字左右&quot;,
+        &quot;「方案与做法」缺少要点：关键实现步骤&quot;,
+        &quot;「落地与验证」仅 26 字，需扩写到 150 字左右&quot;,
+        &quot;「落地与验证」缺少要点：风险与回滚方案&quot;
+      ]
+    },
+    &quot;logs&quot;: [],
+    &quot;meta&quot;: {
+      &quot;notes_applied&quot;: 6
+    }
+  },
+  {
+    &quot;seq&quot;: 26,
+    &quot;ts&quot;: 1792902259.373011,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;draft&quot;,
+    &quot;target&quot;: &quot;edit&quot;,
+    &quot;label&quot;: &quot;初稿&quot;,
+    &quot;when&quot;: null,
+    &quot;fired&quot;: true,
+    &quot;reason&quot;: &quot;无条件&quot;
+  },
+  {
+    &quot;seq&quot;: 27,
+    &quot;ts&quot;: 1792902259.3754137,
+    &quot;type&quot;: &quot;checkpoint&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 4,
+    &quot;step&quot;: 4,
+    &quot;frontier&quot;: [
+      &quot;edit&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 28,
+    &quot;ts&quot;: 1792902259.375419,
+    &quot;type&quot;: &quot;wave_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 5,
+    &quot;nodes&quot;: [
+      &quot;edit&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 29,
+    &quot;ts&quot;: 1792902259.3754308,
+    &quot;type&quot;: &quot;node_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;edit&quot;,
+    &quot;agent&quot;: &quot;editor&quot;,
+    &quot;name&quot;: &quot;审校 Agent&quot;,
+    &quot;visit&quot;: 2,
+    &quot;wave&quot;: 5,
+    &quot;kind&quot;: &quot;review&quot;
+  },
+  {
+    &quot;seq&quot;: 30,
+    &quot;ts&quot;: 1792902259.3757207,
+    &quot;type&quot;: &quot;message&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;message_id&quot;: &quot;m0021&quot;,
+    &quot;sender&quot;: &quot;edit&quot;,
+    &quot;recipient&quot;: &quot;writer&quot;,
+    &quot;kind&quot;: &quot;feedback&quot;,
+    &quot;summary&quot;: &quot;[feedback] edit → writer: 审校结论 pass（0 条阻塞意见）&quot;,
+    &quot;payload&quot;: {
+      &quot;summary&quot;: &quot;审校结论 pass（0 条阻塞意见）&quot;,
+      &quot;notes&quot;: 0
+    }
+  },
+  {
+    &quot;seq&quot;: 31,
+    &quot;ts&quot;: 1792902259.375743,
+    &quot;type&quot;: &quot;node_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;edit&quot;,
+    &quot;agent&quot;: &quot;editor&quot;,
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;duration_ms&quot;: 0.29,
+    &quot;visit&quot;: 2,
+    &quot;attempt&quot;: 1,
+    &quot;detail&quot;: &quot;verdict=pass notes=0项 score=100 revision=2&quot;,
+    &quot;outputs&quot;: {
+      &quot;verdict&quot;: &quot;pass&quot;,
+      &quot;notes&quot;: [],
+      &quot;score&quot;: 100,
+      &quot;revision&quot;: 2,
+      &quot;summary&quot;: &quot;第 2 次审校：pass（0 条待改，评分 100）&quot;,
+      &quot;metrics&quot;: [
+        {
+          &quot;heading&quot;: &quot;背景与问题&quot;,
+          &quot;chars&quot;: 194,
+          &quot;target&quot;: 150,
+          &quot;missing_points&quot;: []
+        },
+        {
+          &quot;heading&quot;: &quot;方案与做法&quot;,
+          &quot;chars&quot;: 187,
+          &quot;target&quot;: 150,
+          &quot;missing_points&quot;: []
+        },
+        {
+          &quot;heading&quot;: &quot;落地与验证&quot;,
+          &quot;chars&quot;: 188,
+          &quot;target&quot;: 150,
+          &quot;missing_points&quot;: []
+        }
+      ]
+    },
+    &quot;logs&quot;: [],
+    &quot;meta&quot;: {
+      &quot;notes&quot;: 0
+    }
+  },
+  {
+    &quot;seq&quot;: 32,
+    &quot;ts&quot;: 1792902259.3758433,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;edit&quot;,
+    &quot;target&quot;: &quot;draft&quot;,
+    &quot;label&quot;: &quot;需要修订&quot;,
+    &quot;when&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions&quot;,
+    &quot;fired&quot;: false,
+    &quot;reason&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &lt; inputs.max_revisions =&gt; False&quot;
+  },
+  {
+    &quot;seq&quot;: 33,
+    &quot;ts&quot;: 1792902259.3758671,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;edit&quot;,
+    &quot;target&quot;: &quot;publish&quot;,
+    &quot;label&quot;: &quot;审校通过&quot;,
+    &quot;when&quot;: &quot;verdict == &#x27;pass&#x27;&quot;,
+    &quot;fired&quot;: true,
+    &quot;reason&quot;: &quot;verdict == &#x27;pass&#x27; =&gt; True&quot;
+  },
+  {
+    &quot;seq&quot;: 34,
+    &quot;ts&quot;: 1792902259.375905,
+    &quot;type&quot;: &quot;edge&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;source&quot;: &quot;edit&quot;,
+    &quot;target&quot;: &quot;publish&quot;,
+    &quot;label&quot;: &quot;达到修订上限&quot;,
+    &quot;when&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions&quot;,
+    &quot;fired&quot;: false,
+    &quot;reason&quot;: &quot;verdict == &#x27;needs_revision&#x27; and revision &gt;= inputs.max_revisions =&gt; False&quot;
+  },
+  {
+    &quot;seq&quot;: 35,
+    &quot;ts&quot;: 1792902259.3787336,
+    &quot;type&quot;: &quot;checkpoint&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 5,
+    &quot;step&quot;: 5,
+    &quot;frontier&quot;: [
+      &quot;publish&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 36,
+    &quot;ts&quot;: 1792902259.3787405,
+    &quot;type&quot;: &quot;wave_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 6,
+    &quot;nodes&quot;: [
+      &quot;publish&quot;
+    ]
+  },
+  {
+    &quot;seq&quot;: 37,
+    &quot;ts&quot;: 1792902259.378756,
+    &quot;type&quot;: &quot;node_start&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;publish&quot;,
+    &quot;agent&quot;: &quot;publisher&quot;,
+    &quot;name&quot;: &quot;发布 Agent&quot;,
+    &quot;visit&quot;: 1,
+    &quot;wave&quot;: 6,
+    &quot;kind&quot;: &quot;deliver&quot;
+  },
+  {
+    &quot;seq&quot;: 38,
+    &quot;ts&quot;: 1792902259.3789885,
+    &quot;type&quot;: &quot;message&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;message_id&quot;: &quot;m0022&quot;,
+    &quot;sender&quot;: &quot;publish&quot;,
+    &quot;recipient&quot;: &quot;user&quot;,
+    &quot;kind&quot;: &quot;result&quot;,
+    &quot;summary&quot;: &quot;[result] publish → user: 终稿 668 字，可直接发布&quot;,
+    &quot;payload&quot;: {
+      &quot;summary&quot;: &quot;终稿 668 字，可直接发布&quot;
+    }
+  },
+  {
+    &quot;seq&quot;: 39,
+    &quot;ts&quot;: 1792902259.3790123,
+    &quot;type&quot;: &quot;node_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;node_id&quot;: &quot;publish&quot;,
+    &quot;agent&quot;: &quot;publisher&quot;,
+    &quot;status&quot;: &quot;ok&quot;,
+    &quot;duration_ms&quot;: 0.22,
+    &quot;visit&quot;: 1,
+    &quot;attempt&quot;: 1,
+    &quot;detail&quot;: &quot;document=# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明  &gt; 读者：… verdict=pass char_count=668 summary=终稿 668 字，可直接发布&quot;,
+    &quot;outputs&quot;: {
+      &quot;document&quot;: &quot;# 多 Agent 工作流在企业内部的落地：面向工程团队的实践说明\n\n&gt; 读者：工程团队　语气：务实\n\n围绕「多 Agent 工作流在企业内部的落地」，说明问题、方案与验证方式。\n\n## 背景与问题\n\n为什么现在要做这件事是本节需要说明的关键点。当前痛点与影响范围是本节需要说明的关键点。关于背景与问题，实现上优先使用标准库，避免引入额外依赖。关于背景与问题，调用方需要关注返回值与异常分支，必要时记录日志。关于背景与问题，该能力在测试环境覆盖了典型输入与边界输入。关于背景与问题，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于背景与问题，上线前建议补充监控指标，便于定位问题。\n\n## 方案与做法\n\n核心设计取舍是本节需要说明的关键点。关键实现步骤是本节需要说明的关键点。关于方案与做法，实现上优先使用标准库，避免引入额外依赖。关于方案与做法，调用方需要关注返回值与异常分支，必要时记录日志。关于方案与做法，该能力在测试环境覆盖了典型输入与边界输入。关于方案与做法，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于方案与做法，上线前建议补充监控指标，便于定位问题。\n\n## 落地与验证\n\n如何度量效果是本节需要说明的关键点。风险与回滚方案是本节需要说明的关键点。关于落地与验证，实现上优先使用标准库，避免引入额外依赖。关于落地与验证，调用方需要关注返回值与异常分支，必要时记录日志。关于落地与验证，该能力在测试环境覆盖了典型输入与边界输入。关于落地与验证，如果输入不满足约束，应当尽早失败并给出可读的错误信息。关于落地与验证，上线前建议补充监控指标，便于定位问题。\n\n---\n\n&gt; 审校结论：**pass**（评分 100）；修订过程中处理意见 0 条；全文约 668 字。\n&quot;,
+      &quot;verdict&quot;: &quot;pass&quot;,
+      &quot;char_count&quot;: 668,
+      &quot;summary&quot;: &quot;终稿 668 字，可直接发布&quot;
+    },
+    &quot;logs&quot;: [],
+    &quot;meta&quot;: {}
+  },
+  {
+    &quot;seq&quot;: 40,
+    &quot;ts&quot;: 1792902259.3821535,
+    &quot;type&quot;: &quot;checkpoint&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;wave&quot;: 6,
+    &quot;step&quot;: 6,
+    &quot;frontier&quot;: []
+  },
+  {
+    &quot;seq&quot;: 41,
+    &quot;ts&quot;: 1792902259.3881936,
+    &quot;type&quot;: &quot;run_end&quot;,
+    &quot;run_id&quot;: &quot;content_creation-20261025-122419-fnu3&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;duration_s&quot;: 0.019,
+    &quot;error&quot;: null,
+    &quot;waves&quot;: 6,
+    &quot;node_runs&quot;: 6,
+    &quot;retries&quot;: 0,
+    &quot;messages&quot;: 6,
+    &quot;edges_fired&quot;: 5,
+    &quot;errors&quot;: 0
+  }
+]</pre></details>
+</div>
+
+<footer>AgentFlow · 生成于 2026-10-25 12:24:19 · 本文件离线自包含，可直接归档</footer>
+</div><script>
+function showTab(group, id) {
+  document.querySelectorAll('[data-group="' + group + '"]').forEach(function (el) {
+    el.classList.toggle('on', el.dataset.tab === id);
+  });
+  document.querySelectorAll('.panel[data-' + 'panel="' + group + '"]').forEach(function (el) {
+    el.classList.toggle('on', el.dataset.panelId === id);
+  });
+}
+</script></body></html>
